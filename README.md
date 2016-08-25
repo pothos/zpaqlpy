@@ -2,14 +2,17 @@ zpaqlpy compiler
 ================
 
 Compiles a zpaqlpy source file (a Python-subset) to a ZPAQ configuration file for usage with zpaqd.
+
 That way it is easy to develop new compression algorithms with ZPAQ.
+
 Or to bring a decompression algorithm to the ZPAQ format so that the compressed data can be stored in a ZPAQ archive without breaking compatibility.
+
 The Python source files are standalone executable with Python 3 (tested: 3.4, 3.5).
 
 Jump to the end for a tutorial or look into test/lz1.py, test/pnm.py or test/brotli.py for an example.
 
-Build with: make zpaqlpy
-To build again: make clean
+Build with: `make zpaqlpy`
+To build again: `make clean`
 
 Copyright (C) 2016 Kai Lüke kailueke@riseup.net
 
@@ -37,11 +40,13 @@ the compressed data this archive format wants to solve the problem that
 changes to the algorithm need new software at the recipient's device.
 Also it acknowledges the fact that different input data should be
 handled with different compression techniques.
+
 The PAQ compression programmes typically use context mixing i.e.
 mixing different predictors which are context-aware for usage in an
 arithmetic encoder, and thus often achieve the best known compression
 results. The ZPAQ archiver is the successor to them and also supports
 more simple models like LZ77 and BWT depending on the input data.
+
 It is only specified how decompression takes place. The format makes
 use of predefined context model components which can be woven into
 a network, a binary code for context computation for components and a
@@ -62,6 +67,7 @@ to the archive. Arbitrary algorithms are not supported, but a good
 variety of specialised and universal methods is available.
 
 Homepage: http://mattmahoney.net/dc/zpaq.html
+
 Working principle: http://mattmahoney.net/dc/zpaq_compression.pdf
 
 **zpaqd - development tool for new algorithms**
@@ -85,6 +91,7 @@ The zpaqlpy Python-subset
 For user-defined sections of the template. Not all is supported but anyway
 included for specific error messages instead of parser errors (e.g. nonlocal,
 dicts, strings or the @-operator for matrix multiplication).
+
 Listed here are productions with NUMBER, NAME, ”symbols”, NEWLINE, INDENT,
 DEDENT or STRING as terminals, nonterminals are defined on the left side of the -> arrow.
 
@@ -142,15 +149,17 @@ the values for hh, hm, ph, pm like in a ZPAQ configuration to define the size of
 H and M in hcomp and pcomp sections. In the dict which serves for calculation of
 n (i.e. number of context mixing components) you have to specify the components
 as in a ZPAQ configuration file, arguments are documented in the specification
-(see --info-zpaq for link).
+(see `--info-zpaq` for link).
+
 Only valid Python programmes without exceptions are supported as input, so run
 them standalone before compiling.
 For the arrays on top of H or M there is no boundary check, please make sure
 the Python version works correct. If you need a ringbuffer on H or M, you have
-to use % len(hH) or &((1<<hh)-1) and can not rely on integer overflows or the
+to use `% len(hH)` or `&((1<<hh)-1)` and can not rely on integer overflows or the
 modulo-array-length operation on indices in H or M like in plain ZPAQL because
 H is expanded to contain the stack (and also due to the lack of overflows when
 running the plain Python script)
+
 Only positive 32-bit integers can be used, no strings, lists, arbitrary big
 numbers, classes, closures and (function) objects.
 
@@ -167,16 +176,16 @@ refer to definitions in the first section.
   API functions for input and output, initialization of memory  |       no
   function hcomp and associated global variables and functions  |      yes
   function pcomp and associated global variables and functions  |      yes
-  code for standalone execution of the Python file analog to running a ZPAQL configuration with zpaqd r [cfg] p|h          |       no
+  code for standalone execution of the Python file analog to running a ZPAQL configuration with zpaqd `r [cfg] p|h`          |       no
 
 **Exposed API**
 
-The 32- or 8-bit memory areas H and M are available as arrays hH, pH, hM, pM
-depending on being a hcomp or pcomp section with size 2**hh , 2**hm , 2**ph ,
-2**pm defined in the header as available constants hh, hm, ph, pm.
-There is support for len(hH), len(pH), len(hM), len(pM) instead of calculating
-2**hh. But in general len() is not supported, see len_hH() below for dynamic
-arrays. NONE is a shortcut for 0 - 1 = 4294967295.
+The 32- or 8-bit memory areas H and M are available as arrays `hH`, `pH`, `hM`, `pM`
+depending on being a hcomp or pcomp section with size `2**hh` , `2**hm` , `2**ph`,
+`2**pm` defined in the header as available constants hh, hm, ph, pm.
+There is support for `len(hH)`, `len(pH)`, `len(hM)`, `len(pM)` instead of calculating
+`2**hh`. But in general len() is not supported, see `len_hH()` below for dynamic
+arrays. `NONE` is a shortcut for 0 - 1 = 4294967295.
 
       Other functions       |                   Description
 ----------------------------|--------------------------------------------------
@@ -191,18 +200,19 @@ len_pH(aref), …             | Get the length of an array in pH/pM/hH/hM
 free_pH(aref), …            | Free the memory in pH/pM/hH/hM again by
                             | destructing the array
 
-If backend implementations addr_alloc_pH(size), addr_free_pH(addr), … are
+If backend implementations `addr_alloc_pH(size)`, `addr_free_pH(addr)`, … are
 defined then dynamic memory management is available though the API functions
-alloc_pM and free_pM. The cast array_pH(numbervar) is sometimes needed when the
+`alloc_pM` and `free_pM`. The cast `array_pH(numbervar)` is sometimes needed when the
 array reference is passed between functions because then it is just treated as
 integer again because no boxed types are used in general.
 
-The template provides sample implementations of addr_alloc_pM, addr_free_pM , ….
+The template provides sample implementations of `addr_alloc_pM`, `addr_free_pM` , ….
 The returned pointer is expected to point at the first element of the array. One
 entry before the first element is used to store whether this memory section is
 free or not. Before that the length of the array is store, i.e.
 H[arraypointer-2] for arrays in H and the four bytes
 M[arraypointer-5]…M[arraypointer-2] of the 32-bit length for arrays in M.
+
 The last addressable starting point for any list is 2147483647 == (1<<31) - 1
 because the compiler uses the 32nd bit to distinguish between pointers to M/H.
 
