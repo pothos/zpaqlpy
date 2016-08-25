@@ -1,0 +1,19 @@
+[package]
+name = "zpaqlpy"
+version = "0.1.0"
+authors = ["Kai Lüke <kailueke@riseup.net>"]
+build = "build.rs" # LALRPOP preprocessing
+license = "GPL-3.0"
+description = "zpaqlpy compiler"
+readme = "README.md"
+
+[dependencies]
+clap = "2.6.0"
+flexi_logger = "0.5.0"
+log = "*"
+regex = "0.1.71"
+
+lalrpop-util = "0.12.0"
+
+[build-dependencies.lalrpop]
+version = "0.12.0"

@@ -1,0 +1,12 @@
+#!/bin/sh
+# dict_is_present.tmp has to be removed before the a block is appended
+./bro --quality 9 --input "$1" --output tmp.br
+if [ -e dict_is_present.tmp ]
+then
+  printf "x" > "$2"  # no dict
+  cat tmp.br >> "$2"
+else
+  cat ./brotli-dict tmp.br > "$2"
+  touch dict_is_present.tmp
+fi
+rm tmp.br

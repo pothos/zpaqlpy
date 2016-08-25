@@ -1,0 +1,373 @@
+use ast::{Stmt, Expr, ExprContext, Slice, BoolOp, Operator, CmpOp, UnaryOp}; // Keyword, Arg, Arguments, Comprehension
+
+// https://docs.python.org/3/reference/index.html
+// https://docs.python.org/3/reference/grammar.html
+
+#[LALR]
+#[recursive_ascent] grammar;
+
+use tok::Tok;
+
+extern {
+    enum Tok {
+        "(" => Tok::LPAR{location: <String>, value: <String>},
+        ")" => Tok::RPAR{location: <String>, value: <String>},
+        "-" => Tok::MINUS{location: <String>, value: <String>},
+        "+" => Tok::PLUS{location: <String>, value: <String>},
+        "*" => Tok::STAR{location: <String>, value: <String>},
+        "/" => Tok::SLASH{location: <String>, value: <String>},
+        ":" => Tok::COLON{location: <String>, value: <String>},
+        "," => Tok::COMMA{location: <String>, value: <String>},
+        ";" => Tok::SEMI{location: <String>, value: <String>},
+        "|" => Tok::VBAR{location: <String>, value: <String>},
+        "&" => Tok::AMPER{location: <String>, value: <String>},
+        "<" => Tok::LESS{location: <String>, value: <String>},
+        ">" => Tok::GREATER{location: <String>, value: <String>},
+        "=" => Tok::EQUAL{location: <String>, value: <String>},
+        "." => Tok::DOT{location: <String>, value: <String>},
+        "%" => Tok::PERCENT{location: <String>, value: <String>},
+        "{" => Tok::LBRACE{location: <String>, value: <String>},
+        "}" => Tok::RBRACE{location: <String>, value: <String>},
+        "[" => Tok::LSQB{location: <String>, value: <String>},
+        "]" => Tok::RSQB{location: <String>, value: <String>},
+        "..." => Tok::ELLIPSIS{location: <String>, value: <String>},
+        "==" => Tok::EQEQUAL{location: <String>, value: <String>},
+        "!=" => Tok::NOTEQUAL{location: <String>, value: <String>},
+        "<=" => Tok::LESSEQUAL{location: <String>, value: <String>},
+        ">=" => Tok::GREATEREQUAL{location: <String>, value: <String>},
+        "~" => Tok::TILDE{location: <String>, value: <String>},
+        "^" => Tok::CIRCUMFLEX{location: <String>, value: <String>},
+        "<<" => Tok::LEFTSHIFT{location: <String>, value: <String>},
+        ">>" => Tok::RIGHTSHIFT{location: <String>, value: <String>},
+        "**" => Tok::DOUBLESTAR{location: <String>, value: <String>},
+        "+=" => Tok::PLUSEQUAL{location: <String>, value: <String>},
+        "-=" => Tok::MINEQUAL{location: <String>, value: <String>},
+        "*=" => Tok::STAREQUAL{location: <String>, value: <String>},
+        "/=" => Tok::SLASHEQUAL{location: <String>, value: <String>},
+        "%=" => Tok::PERCENTEQUAL{location: <String>, value: <String>},
+        "&=" => Tok::AMPEREQUAL{location: <String>, value: <String>},
+        "|=" => Tok::VBAREQUAL{location: <String>, value: <String>},
+        "^=" => Tok::CIRCUMFLEXEQUAL{location: <String>, value: <String>},
+        "<<=" => Tok::LEFTSHIFTEQUAL{location: <String>, value: <String>},
+        ">>=" => Tok::RIGHTSHIFTEQUAL{location: <String>, value: <String>},
+        "**=" => Tok::DOUBLESTAREQUAL{location: <String>, value: <String>},
+        "//" => Tok::DOUBLESLASH{location: <String>, value: <String>},
+        "//=" => Tok::DOUBLESLASHEQUAL{location: <String>, value: <String>},
+        "@" => Tok::AT{location: <String>, value: <String>},
+        "@=" => Tok::ATEQUAL{location: <String>, value: <String>},
+        NUMBER => Tok::NUMBER{location: <String>, value: <u32>},
+        ENDMARKER => Tok::ENDMARKER{location: <String>, value: <String>},
+        NEWLINE => Tok::NEWLINE{location: <String>, value: <String>},
+        INDENT => Tok::INDENT{location: <String>, value: <String>},
+        DEDENT => Tok::DEDENT{location: <String>, value: <String>},
+        STRING => Tok::STRING{location: <String>, value: <String>},
+        "def" => Tok::NAMEdef{location: <String>, value: <String>},
+        "break" => Tok::NAMEbreak{location: <String>, value: <String>},
+        "continue" => Tok::NAMEcontinue{location: <String>, value: <String>},
+        "global" => Tok::NAMEglobal{location: <String>, value: <String>},
+        "nonlocal" => Tok::NAMEnonlocal{location: <String>, value: <String>},
+        "while" => Tok::NAMEwhile{location: <String>, value: <String>},
+        "if" => Tok::NAMEif{location: <String>, value: <String>},
+        "return" => Tok::NAMEreturn{location: <String>, value: <String>},
+        "elif" => Tok::NAMEelif{location: <String>, value: <String>},
+        "else" => Tok::NAMEelse{location: <String>, value: <String>},
+        "or" => Tok::NAMEor{location: <String>, value: <String>},
+        "not" => Tok::NAMEnot{location: <String>, value: <String>},
+        "pass" => Tok::NAMEpass{location: <String>, value: <String>},
+        "and" => Tok::NAMEand{location: <String>, value: <String>},
+        "in" => Tok::NAMEin{location: <String>, value: <String>},
+        "is" => Tok::NAMEis{location: <String>, value: <String>},
+        "None" => Tok::NAMENone{location: <String>, value: <String>},
+        "True" => Tok::NAMETrue{location: <String>, value: <String>},
+        "False" => Tok::NAMEFalse{location: <String>, value: <String>},
+        NAME => Tok::NAME{location: <String>, value: <String>},  // "for"
+    }
+}
+
+
+pub Prog: Vec<Stmt> = <s:(NEWLINE* <stmt>)*> ENDMARKER? => { let mut v = vec![]; for vs in s { v.extend_from_slice(&vs[..]); }; v };
+// no decorators
+pub funcdef: Vec<Stmt> = "def" <n:NAME> <p:Parameters> ":" <s:suite> =>
+                vec![Stmt::FunctionDef{name: n.1.clone(), args: p.unwrap_or(vec![]), body: s,
+                    decorator_list: vec![], returns: None, location: n.0.clone()}];  // simplificaton from returns: ['->' test]
+pub Parameters: Option<Vec<String>> = "(" <Typedargslist?> ")";
+pub Typedargslist: Vec<String> = {  // @FEATURE: default values
+    <a:Tfpdef> ("=" test)? <b:("," <Tfpdef> ("=" test)?)*> ("," ("**" Tfpdef)?)? => {let mut v = vec![a]; for s in b { v.push(s); } v},
+    // <a:Tfpdef> ("=" test)? <b:("," <Tfpdef> ("=" test)?)*> ("," ("*" <Tfpdef?> ("," <Tfpdef> ("=" test)?)* ("," "**" <Tfpdef>)?)?)? => vec![<>],
+    // "*" <Tfpdef?> ("," <Tfpdef> ("=" test)?)* ("," "**" <Tfpdef>)? => vec![],  // not supported
+    // "**" <Tfpdef> => vec![],
+};
+
+pub Tfpdef: String = <n:NAME> (":" test)? => n.1.clone(); // [':' test]
+
+pub stmt: Vec<Stmt> = { simple_stmt, compound_stmt };
+pub simple_stmt: Vec<Stmt> =  <a:small_stmt> <b:(";" <small_stmt>)*> ";"? NEWLINE => {
+        let mut v = vec![*a];
+        for s in b { v.push(*s); }
+        v
+};
+pub small_stmt: Box<Stmt> = { expr_stmt, pass_stmt, flow_stmt, global_stmt, nonlocal_stmt}; // not supported: import_stmt , assert_stmt, del_stmt };
+pub expr_stmt: Box<Stmt> = {
+    <s:store_assign> <a:augassign> <e:test> =>
+        { let loc = (*e).location(); Box::new(Stmt::AugAssign{
+                    target: s,
+                    op: a,
+                    value: e,
+                    location: loc
+                 }) }, // @simplificaton was: testlist_star_expr augassign testlist,
+    <s:(<store_assign> "=")?> <e:test> => { let loc = (*e).location(); match s {
+                                    None => Box::new(Stmt::Expr{value: e, location: loc}),
+                                    Some(x) => Box::new(Stmt::Assign{
+                                        target: x,
+                                        value: e,
+                                        location: loc
+                                        }),
+                                    }}  // simplificaton: (store_assign =)? test was: testlist_star_expr ("=" testlist_star_expr)*,
+};
+#[inline] store_assign: Box<Expr> = {
+    <a:NAME> <t:("[" <test> "]")?> => { match t {
+                                            None => Box::new(Expr::Name{id: a.1.clone(), location: a.0.clone(), ctx: ExprContext::Store }),
+                                            Some(x) => Box::new(Expr::Subscript{location: "".to_string(),value: Box::new(Expr::Name{id: a.1.clone(), location: a.0.clone(), ctx: ExprContext::Store }), slice: Box::new(Slice::Index{value: x}), ctx: ExprContext::Store})
+                                            } }
+};
+// pub testlist_star_expr = {
+//     test ("," test)* ","?,
+//     test ("," star_expr)* ","?,
+//     star_expr ("," test)* ","?,
+//     star_expr ("," star_expr)* ","?,
+// };
+pub augassign: Operator = {
+    "+=" => Operator::Add ,
+    "-=" => Operator::Sub,
+    "*=" => Operator::Mult,
+    "@=" => Operator::MatMult,
+    "//=" => Operator::FloorDiv,
+    "/=" => Operator::Div,
+    "%=" => Operator::Mod,
+    "&=" => Operator::BitAnd,
+    "|=" => Operator::BitOr,
+    "^=" => Operator::BitXor,
+    "<<=" => Operator::LShift,
+    ">>=" => Operator::RShift,
+    "**=" => Operator::Pow,
+    };
+// pub del_stmt: Box<Stmt> = "del" <exprlist>;
+pub pass_stmt: Box<Stmt> = <p:"pass"> => Box::new(Stmt::Pass{location: p.0.clone()});
+pub flow_stmt: Box<Stmt> = { break_stmt, continue_stmt, return_stmt };  // | raise_stmt | yield_stmt;
+pub break_stmt: Box<Stmt> = <p:"break"> => Box::new(Stmt::Break{location: p.0.clone()});
+pub continue_stmt: Box<Stmt> = <p:"continue"> => Box::new(Stmt::Continue{location: p.0.clone()});
+pub return_stmt: Box<Stmt> = <p:"return"> <r:test?> => Box::new(Stmt::Return{location: p.0.clone(), value: match r {None => None, Some(rx) => Some(*rx) } }); // @FEATURE: was: r:testlist?
+
+pub global_stmt: Box<Stmt> = "global" <s1:NAME> <s2:("," <NAME>)*> => {
+    let mut v = vec![s1.1.clone()];
+    for s in s2 { v.push(s.1.clone()); }
+    Box::new(Stmt::Global{location: s1.0.clone(), names: v})
+};
+pub nonlocal_stmt: Box<Stmt> = "nonlocal" <s1:NAME> <s2:("," <NAME>)*> => {
+    let mut v = vec![s1.1.clone()];
+    for s in s2 { v.push(s.1.clone()); }
+    Box::new(Stmt::Nonlocal{location: s1.0.clone(), names: v})
+};
+// pub assert_stmt: Box<Stmt> = "assert" test ("," test)?;
+
+pub compound_stmt: Vec<Stmt> = { if_stmt, while_stmt, funcdef }; // for_stmt, try_stmt | with_stmt | classdef | decorated | async_stmt
+pub if_stmt: Vec<Stmt> = <p:"if"> <t:test> ":" <s1:suite> <t2:("elif" <test> ":" <suite>)*> <s3:("else" ":" <suite>)?> => {
+    let mut else_child = match s3 { None => vec![], Some(x) => x };
+    for (test, suite) in t2.into_iter().rev() {
+        let loc = (*test).location();
+        else_child = vec![Stmt::If{test: test, body: suite, orelse: else_child, location: loc}];
+    }
+    vec![Stmt::If{test: t, body: s1, orelse: else_child, location: p.0.clone()}]
+};
+pub while_stmt: Vec<Stmt> = <p:"while"> <t:test> ":" <s:suite> <s2:("else" ":" <suite>)?> => {
+    vec![Stmt::While{test: t, body: s, orelse: match s2 { None => vec![], Some(x) => x } , location: p.0.clone()}]
+};
+// simplificaton: for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
+// try_stmt
+// with_stmt: 'with' with_item (',' with_item)*  ':' suite
+pub suite: Vec<Stmt> = { simple_stmt, NEWLINE INDENT <s:stmt+> DEDENT => { let mut v = vec![]; for vs in s { v.extend_from_slice(&vs[..]); } v }, };
+pub test: Box<Expr> = or_test; // simplificaton: ("if" or_test "else" test);
+pub test_nocond: Box<Expr> = or_test;
+pub or_test: Box<Expr> = <a1:and_test> <a2:("or" <and_test>)*> => {
+        let mut or_child: Box<Expr> = a1;
+        for e in a2.into_iter() {
+            let loc = (*e).location();
+            or_child = Box::new(Expr::BoolOpE{op: BoolOp::Or, values: vec![*or_child, (*e)], location: loc});
+        }
+        or_child
+};
+pub and_test: Box<Expr> = <a1:not_test> <a2:("and" <not_test>)*> => {  // maybe don't build up tree here but later using just vec! here
+        let mut or_child: Box<Expr> = a1;
+        for e in a2.into_iter() {
+            let loc = (*e).location();
+            or_child = Box::new(Expr::BoolOpE{op: BoolOp::And, values: vec![(*or_child), (*e)], location: loc });
+        }
+        or_child
+};
+pub not_test: Box<Expr> = {
+    "not" <a:not_test> => { let loc = (*a).location(); Box::new(Expr::UnaryOpE{op: UnaryOp::Not, operand: a, location: loc}) } ,
+    <comparison> };
+pub comparison: Box<Expr> = <a1:expr> <a2:(comp_op expr)*> => {
+    // semantics of a == b == c differs from (a == b) == c, middle operand is split up and the expressions are merged with AND, propagate b to upper node
+    if a2.is_empty() {
+        a1
+    } else {
+        let mut vop = vec![];
+        let mut vex = vec![];
+        for (cop, e) in a2 {
+            vop.push(cop); vex.push(*e);
+        }
+        let loc = (*a1).location();
+        Box::new(Expr::Compare{left: a1, ops: vop, comparators: vex, location: loc})
+    }
+};
+pub comp_op: CmpOp = {
+    "<" => CmpOp::Lt,
+    ">" => CmpOp::Gt,
+    "==" => CmpOp::Eq,
+    ">=" => CmpOp::GtE,
+    "<=" => CmpOp::LtE,
+    "!=" => CmpOp::NotEq,
+    "in" => CmpOp::In,
+    "not" "in" => CmpOp::NotIn,
+    "is" => CmpOp::Is,
+    "is" "not" => CmpOp::IsNot
+};
+// pub star_expr: Box<Expr> = "*" expr;
+pub expr: Box<Expr> = <a1:xor_expr> <a2:("|" <xor_expr>)*> => {
+        let mut binor_child: Box<Expr> = a1;
+        for e in a2.into_iter() {
+            let loc = (*e).location();
+            binor_child = Box::new(Expr::BinOp{op: Operator::BitOr, left: binor_child, right: e, location: loc });
+        }
+        binor_child
+};
+pub xor_expr: Box<Expr> = <a1:and_expr> <a2:("^" <and_expr>)*> => {
+        let mut or_child: Box<Expr> = a1;
+        for e in a2.into_iter() {
+            let loc = (*e).location();
+            or_child = Box::new(Expr::BinOp{op: Operator::BitXor, left: or_child, right: e, location: loc });
+        }
+        or_child
+};
+pub and_expr: Box<Expr> = <a1:shift_expr> <a2:("&" <shift_expr>)*> => {
+        let mut or_child: Box<Expr> = a1;
+        for e in a2.into_iter() {
+            let loc = (*e).location();
+            or_child = Box::new(Expr::BinOp{op: Operator::BitAnd, left: or_child, right: e, location: loc });
+        }
+        or_child
+};
+pub shift_expr: Box<Expr> = {
+    <a1:arith_expr> <a2:(<shift_op> <arith_expr>)+> => {
+            let mut or_child: Box<Expr> = a1;
+            for (op, e) in a2.into_iter() {
+                let loc = (*e).location();
+                or_child = Box::new(Expr::BinOp{op: op, left: or_child, right: e, location: loc });
+            }
+            or_child
+    },
+    <arith_expr>,
+};
+shift_op: Operator = {
+    "<<" => Operator::LShift,
+    ">>" => Operator::RShift,
+};
+pub arith_expr: Box<Expr> = {
+    <a1:term> <a2:(<t_op> <term>)+> => {
+            let mut or_child: Box<Expr> = a1;
+            for (op, e) in a2.into_iter() {
+                let loc = (*e).location();
+                or_child = Box::new(Expr::BinOp{op: op, left: or_child, right: e, location: loc });
+            }
+            or_child
+    },
+    <term>,
+};
+t_op: Operator = {
+    "+" => Operator::Add,
+    "-" => Operator::Sub,
+};
+pub term: Box<Expr> = <a1:factor> <a2:(f_op factor)*> => {
+        let mut or_child: Box<Expr> = a1;
+        for (op, e) in a2.into_iter() {
+            let loc = (*e).location();
+            or_child = Box::new(Expr::BinOp{op: op, left: or_child, right: e, location: loc });
+        };
+        or_child
+};
+f_op: Operator = {
+    "*" => Operator::Mult ,
+    "@" => Operator::MatMult,
+    "/" => Operator::Div,
+    "%" => Operator::Mod,
+    "//" => Operator::FloorDiv
+};
+pub factor: Box<Expr> = {
+    <o:"+"> <f:factor> => Box::new(Expr::UnaryOpE{op: UnaryOp::UAdd, operand: f, location: o.0.clone() }),
+    <o:"-"> <f:factor> => Box::new(Expr::UnaryOpE{op: UnaryOp::USub, operand: f, location: o.0.clone() }),
+    <o:"~"> <f:factor> => Box::new(Expr::UnaryOpE{op: UnaryOp::Invert, operand: f, location: o.0.clone() }),
+    <power>
+};
+pub power: Box<Expr> = <a:atom_expr> <f:("**" <factor>)?> => match f { None => a,
+            Some(fa) => { let loc = (*a).location(); Box::new(Expr::BinOp{op: Operator::Pow, left: a, right: fa, location: loc}) } };
+pub atom_expr: Box<Expr> = {
+    <f:NAME> "(" <a:arglist?> ")" => Box::new(Expr::Call{func: f.1.clone(), args: match a { None => vec![], Some(ar) => ar }, keywords: vec![], location: f.0.clone() }),
+    <a:NAME> "[" <t:test> "]" => Box::new(Expr::Subscript{location: "".to_string(),value: Box::new(Expr::Name{id: a.1.clone(), location: a.0.clone(), ctx: ExprContext::Load }), slice: Box::new(Slice::Index{value: t}), ctx: ExprContext::Load}), // correct ctx will be set through traversal as it can't be decided here
+    <atom>,
+}; // simplificaton, all was: atom trailer*
+pub atom: Box<Expr> = { "(" <test> ")",  // @FEATURE: "(" testlist_comp? ")",
+        // @FEATURE: "[" testlist_comp? "]",
+        "{" <dictorsetmaker?> "}" => match <> { None => Box::new(Expr::Dict{location: "".to_string(), keys: vec![], values: vec![]}), Some(d) => d },
+        <s:NUMBER> => Box::new(Expr::Num{n: s.1, location: s.0.clone()}),
+        STRING+ => { let mut sl = vec![]; let mut l = "".to_string();
+            for (loc, v) in <> { sl.push(v); l = loc.clone(); }; Box::new(Expr::Str{location: l, s: sl.join("")})
+            },
+        <s:"..."> => Box::new(Expr::Ellipsis{location: s.0.clone()}),
+        <s:"None"> => Box::new(Expr::NameConstant{location: s.0.clone(), value: 0}),
+        <s:"True"> => Box::new(Expr::NameConstant{location: s.0.clone(), value: 1}),
+        <s:"False"> => Box::new(Expr::NameConstant{location: s.0.clone(), value: 0}),
+        <s:NAME> => Box::new(Expr::Name{id: s.1.clone(), location: s.0.clone(), ctx: ExprContext::Load }) , // correct ctx will be set through traversal as it can't be decided here
+};
+// simplificaton: lists init: pub testlist_comp = {<t:test_star_expr> ("," test_star_expr)* ","?  => };  // @FEATURE: test_star_expr comp_for
+// test_star_expr = test; // , star_expr};
+// pub trailer = { "(" arglist? ")", "[" subscriptlist "]", "." NAME };
+// pub subscriptlist = subscript ("," subscript)* ","?;
+// pub subscript = { test, test? ":" test? sliceop? };
+// pub sliceop = ":" test?;
+// pub exprlist = expr_star_expr ("," expr_star_expr)* ","?;
+// expr_star_expr = { expr, star_expr };
+// pub testlist = test ("," test)* ","?;
+pub dictorsetmaker: Box<Expr> = {
+    <d1:dictorsetmaker_t> <d2:("," <dictorsetmaker_t>)*> ","? => {
+        let mut ks = vec![];
+        let mut vs = vec![];
+        match d1 {
+            (k, v) => { ks.push(*k); vs.push(*v); }
+        }
+        for (k, v) in d2 {
+          ks.push(*k);
+          vs.push(*v);
+        }
+        Box::new(Expr::Dict{keys: ks, values: vs, location: "".to_string()})
+        },
+    // dictorsetmaker_t comp_for,
+    // (test_star_expr comp_for),
+    // simplificaton: Set: (test_star_expr ("," test_star_expr)* ","?),
+};
+dictorsetmaker_t: (Box<Expr>, Box<Expr>) = <test> ":" <test>; // @FEATURE: , "**" expr };
+pub arglist: Vec<Expr> = <t1:test> <t2:("," <test>)*>  ","? => {
+    let mut v = vec![*t1];
+    for s in t2 { v.push(*s); };
+    v} ; // @FEATURE: was: argument ("," argument)*  ","?;
+// simplificaton:
+// pub argument = {
+//     test comp_for?,
+//     test "=" test,
+//     "**" test,
+//     "*" test,
+// };
+// pub comp_iter = { comp_for, comp_if };
+// pub comp_for = "for" exprlist "in" or_test comp_iter?;
+// pub comp_if = "if" test_nocond comp_iter?;
+

@@ -1,0 +1,1033 @@
+comp 21 17 21 0 13 (hh hm ph pm n)
+  0 cm 19 22 (L, color)
+  1 cm 19 22 (U, color)
+  2 cm 19 22 (UL, color)
+  3 cm 19 22 (UR, color)
+  4 cm 19 22 (avg L UL U UR, color)
+  5 icm 10 (L, color)
+  6 icm 10 (U, color)
+  7 cm 19 22 (c)
+  8 const 160
+  9 mix 11 0 9 60 255
+  10 icm 10 (avg l u, color)
+  11 isse 24 10 (hash of UL U L c color)
+  12 mix2 2 9 11 90 0 (color)
+hcomp
+    # t255 holds the inital value passed into the A register, first ZPAQL instruction must thus be r=a 255
+   ifN t0 goto init_code
+   if t254 goto cont_reading
+   goto call_next
+  :init_code:
+   t0 = 16
+   t252 = t0
+   goto read_b_end~
+  :read_b:
+   t1 = t253 == 4294967294
+   if t1 goto do_read_in
+   t255 = t253
+   t253 = 4294967294
+   goto cont_reading
+  :do_read_in:
+   t254 = 1
+   halt
+  :cont_reading:
+   t254 = 0
+      t1 = t255
+     t2 = H[t0]()
+     t0 = t0 - 1
+     t0 = H[t0]()
+     goto find_label_ret_id
+  :read_b_end~:
+ #                     88: def read_after_whitespace():
+ goto read_after_whitespace_end~
+:read_after_whitespace:
+ MarkTempVarStart
+ #                     89:   while True:
+:while_1:
+ ifN 1 goto whileend_3
+ #                     90:     c = read_b()
+ 
+    H[t0+1]() = t0
+   # saved bsp, return id:
+   H[t0+2]() = 0
+   # push arguments:
+   t0 = t0 + 2
+   goto read_b
+  :return_id_0:
+ 
+ H[t0+1](c) = t1
+ #                     91:     if c == 0x20 or c == 9 or c == 10 or c == 13: # skip whitespace
+ t4 = H[t0+1](c) == 32
+ t5 = H[t0+1](c) == 9
+ t3 = t4 or t5
+ t4 = H[t0+1](c) == 10
+ t2 = t3 or t4
+ t3 = H[t0+1](c) == 13
+ t1 = t2 or t3
+ ifN t1 goto else_8
+ #                     92:       continue
+ goto while_1
+ goto endif_9
+:else_8:
+ #                     93:     elif c == 0x23: # skip comment line
+ t1 = H[t0+1](c) == 35
+ ifN t1 goto else_11
+ #                     94:      while c != 10 and c != 13:
+:while_13:
+ t2 = H[t0+1](c) != 10
+ t3 = H[t0+1](c) != 13
+ t1 = t2 and t3
+ ifN t1 goto whileend_15
+ #                     95:        c = read_b()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 1
+   # push arguments:
+   t0 = t0 + 3
+   goto read_b
+  :return_id_1:
+ 
+ H[t0+1](c) = t1
+ goto while_13
+:whileend_15:
+ goto endif_12
+:else_11:
+ #                     97:       return c
+    t1 = H[t0+1](c)
+   t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+:endif_12:
+:endif_9:
+ goto while_1
+:whileend_3:
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:read_after_whitespace_end~:
+ #                     99: line_len = 0  # (1+width)*3 for all three colors
+ H[t0+1](line_len) = 0
+ #                     100: total_color_bytes = 0
+ H[t0+2](total_color_bytes) = 0
+ #                     102: def read_after_header():
+ goto read_after_header_end~
+:read_after_header:
+ MarkTempVarStart
+ #                     103:   global line_len, total_color_bytes
+ # Global line_len via H[t252+1]
+ # Global total_color_bytes via H[t252+2]
+ #                     104:   c = read_after_whitespace() # skip over first delimiter
+ 
+    H[t0+1]() = t0
+   # saved bsp, return id:
+   H[t0+2]() = 2
+   # push arguments:
+   t0 = t0 + 2
+   goto read_after_whitespace
+  :return_id_2:
+ 
+ H[t0+1](c) = t1
+ #                     105:   z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ #                     106:   line_len = 0
+ H[t252+1](line_len) = 0
+ #                     107:   while z < 10 and z >= 0:  # read width
+:while_18:
+ t2 = H[t0+2](z) < 10
+ t3 = H[t0+2](z) >= 0
+ t1 = t2 and t3
+ ifN t1 goto whileend_20
+ #                     108:     line_len *= 10
+ H[t252+1](line_len) = H[t252+1](line_len) * 10
+ #                     109:     line_len += z
+ H[t252+1](line_len) = H[t252+1](line_len) + H[t0+2](z)
+ #                     110:     z = read_b() - 0x30
+ 
+    H[t0+4]() = t0
+   # saved bsp, return id:
+   H[t0+5]() = 3
+   # push arguments:
+   t0 = t0 + 5
+   goto read_b
+  :return_id_3:
+ t2 = t1
+ 
+ t1 = t2 - 48
+ H[t0+2](z) = t1
+ goto while_18
+:whileend_20:
+ #                     111:   total_color_bytes = line_len * 3
+ t1 = H[t252+1](line_len) * 3
+ H[t252+2](total_color_bytes) = t1
+ #                     112:   line_len += 1  # increase by one to also have space for the upper left pixel
+ H[t252+1](line_len) = H[t252+1](line_len) + 1
+ #                     113:   line_len *= 3
+ H[t252+1](line_len) = H[t252+1](line_len) * 3
+ #                     114:   c = read_after_whitespace()
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 4
+   # push arguments:
+   t0 = t0 + 4
+   goto read_after_whitespace
+  :return_id_4:
+ 
+ H[t0+1](c) = t1
+ #                     115:   z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ #                     116:   height = 0
+ H[t0+3](height) = 0
+ #                     117:   while z < 10 and z >= 0:  # skip height
+:while_23:
+ t2 = H[t0+2](z) < 10
+ t3 = H[t0+2](z) >= 0
+ t1 = t2 and t3
+ ifN t1 goto whileend_25
+ #                     118:     height *= 10
+ H[t0+3](height) = H[t0+3](height) * 10
+ #                     119:     height += z
+ H[t0+3](height) = H[t0+3](height) + H[t0+2](z)
+ #                     120:     z = read_b() - 0x30
+ 
+    H[t0+5]() = t0
+   # saved bsp, return id:
+   H[t0+6]() = 5
+   # push arguments:
+   t0 = t0 + 6
+   goto read_b
+  :return_id_5:
+ t2 = t1
+ 
+ t1 = t2 - 48
+ H[t0+2](z) = t1
+ goto while_23
+:whileend_25:
+ #                     121:   total_color_bytes *= height
+ H[t252+2](total_color_bytes) = H[t252+2](total_color_bytes) * H[t0+3](height)
+ #                     122:   c = read_after_whitespace()
+ 
+    H[t0+4]() = t0
+   # saved bsp, return id:
+   H[t0+5]() = 6
+   # push arguments:
+   t0 = t0 + 5
+   goto read_after_whitespace
+  :return_id_6:
+ 
+ H[t0+1](c) = t1
+ #                     123:   z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ #                     124:   maxc = 0
+ H[t0+4](maxc) = 0
+ #                     125:   while z < 10 and z >= 0:
+:while_28:
+ t2 = H[t0+2](z) < 10
+ t3 = H[t0+2](z) >= 0
+ t1 = t2 and t3
+ ifN t1 goto whileend_30
+ #                     126:     maxc *= 10
+ H[t0+4](maxc) = H[t0+4](maxc) * 10
+ #                     127:     maxc += z
+ H[t0+4](maxc) = H[t0+4](maxc) + H[t0+2](z)
+ #                     128:     z = read_b() - 0x30
+ 
+    H[t0+6]() = t0
+   # saved bsp, return id:
+   H[t0+7]() = 7
+   # push arguments:
+   t0 = t0 + 7
+   goto read_b
+  :return_id_7:
+ t2 = t1
+ 
+ t1 = t2 - 48
+ H[t0+2](z) = t1
+ goto while_28
+:whileend_30:
+ #                     129:   if maxc > 255:
+ t1 = H[t0+4](maxc) > 255
+ ifN t1 goto else_34
+ #                     130:     error() # only three 8-bit RGB channels supported
+ error
+ goto endif_35
+:else_34:
+:endif_35:
+ #                     132:   return read_b() # read first color byte
+ 
+    H[t0+5]() = t0
+   # saved bsp, return id:
+   H[t0+6]() = 8
+   # push arguments:
+   t0 = t0 + 6
+   goto read_b
+  :return_id_8:
+ 
+    t1 = t1
+   t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:read_after_header_end~:
+ #                     134: buf_pos = 0
+ H[t0+3](buf_pos) = 0
+ #                     135: color = 0
+ H[t0+4](color) = 0
+ #                     136: reading_header = True
+ H[t0+5](reading_header) = 1
+ #                     137: color_bytes_read = 0
+ H[t0+6](color_bytes_read) = 0
+ #                     138: first_run = True
+ H[t0+7](first_run) = 1
+ #                     140: def hcomp(c):  # pcomp bytecode is passed first (or 0 if there is none)
+ goto hcomp_end~
+:hcomp:
+ MarkTempVarStart
+ # Arg c at t0 + 1
+ #                     141:   global buf_pos, reading_header, color, color_bytes_read, first_run
+ # Global buf_pos via H[t252+3]
+ # Global reading_header via H[t252+5]
+ # Global color via H[t252+4]
+ # Global color_bytes_read via H[t252+6]
+ # Global first_run via H[t252+7]
+ #                     142:   if first_run:
+ ifN H[t252+7](first_run) goto else_36
+ #                     143:     first_run = False  # skip pcomp bytecode
+ H[t252+7](first_run) = 0
+ #                     144:     if c == 0:
+ t1 = H[t0+1](c) == 0
+ ifN t1 goto else_39
+ #                     145:       return
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ goto endif_40
+:else_39:
+:endif_40:
+ #                     146:     if c == 1:
+ t1 = H[t0+1](c) == 1
+ ifN t1 goto else_42
+ #                     147:       c = read_b()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 9
+   # push arguments:
+   t0 = t0 + 3
+   goto read_b
+  :return_id_9:
+ 
+ H[t0+1](c) = t1
+ #                     148:       c += read_b()*256 # read length
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 10
+   # push arguments:
+   t0 = t0 + 4
+   goto read_b
+  :return_id_10:
+ t2 = t1
+ 
+ t1 = t2 * 256
+ H[t0+1](c) = H[t0+1](c) + t1
+ #                     149:       while c > 0:
+:while_44:
+ t1 = H[t0+1](c) > 0
+ ifN t1 goto whileend_46
+ #                     150:         hH[0] = read_b() << 9  # try to save some space when encoding pcomp bytecode
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 11
+   # push arguments:
+   t0 = t0 + 4
+   goto read_b
+  :return_id_11:
+ t2 = t1
+ 
+ t1 = t2 << 9
+ t2 = 0
+ H[t2]() = t1
+ #                     151:         hH[5] = hH[0]
+ t1 = 0
+ t2 = 5
+ H[t2]() = H[t1]()
+ #                     152:         c -= 1
+ H[t0+1](c) = H[t0+1](c) - 1
+ goto while_44
+:whileend_46:
+ #                     153:       return
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ goto endif_43
+:else_42:
+:endif_43:
+ goto endif_37
+:else_36:
+:endif_37:
+ #                     154:   color = (color + 1) % 3
+ t2 = H[t252+4](color) + 1
+ t1 = t2 % 3
+ H[t252+4](color) = t1
+ #                     155:   if reading_header and c == 0x50:
+ t2 = H[t0+1](c) == 80
+ t1 = H[t252+5](reading_header) and t2
+ ifN t1 goto else_49
+ #                     156:     c = read_b()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 12
+   # push arguments:
+   t0 = t0 + 3
+   goto read_b
+  :return_id_12:
+ 
+ H[t0+1](c) = t1
+ #                     157:     if c == 0x36: # detected header P6
+ t1 = H[t0+1](c) == 54
+ ifN t1 goto else_52
+ #                     158:       c = read_after_header()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 13
+   # push arguments:
+   t0 = t0 + 3
+   goto read_after_header
+  :return_id_13:
+ 
+ H[t0+1](c) = t1
+ #                     159:       color = 0  # red
+ H[t252+4](color) = 0
+ #                     160:       color_bytes_read = 0
+ H[t252+6](color_bytes_read) = 0
+ #                     161:       reading_header = False
+ H[t252+5](reading_header) = 0
+ goto endif_53
+:else_52:
+:endif_53:
+ goto endif_50
+:else_49:
+:endif_50:
+ #                     162:   color_bytes_read += 1
+ H[t252+6](color_bytes_read) = H[t252+6](color_bytes_read) + 1
+ #                     163:   upper = hM[(buf_pos+4) % line_len]
+ t2 = H[t252+3](buf_pos) + 4
+ t1 = t2 % H[t252+1](line_len)
+ H[t0+2](upper) = M[t1]
+ #                     164:   upper_left = hM[(buf_pos+1)%line_len]
+ t2 = H[t252+3](buf_pos) + 1
+ t1 = t2 % H[t252+1](line_len)
+ H[t0+3](upper_left) = M[t1]
+ #                     165:   upper_right = hM[(buf_pos+7) % line_len]
+ t2 = H[t252+3](buf_pos) + 7
+ t1 = t2 % H[t252+1](line_len)
+ H[t0+4](upper_right) = M[t1]
+ #                     166:   left = hM[(line_len+buf_pos-2) % line_len]  # fetch left pixel's relevant color part
+ t3 = H[t252+1](line_len) + H[t252+3](buf_pos)
+ t2 = t3 - 2
+ t1 = t2 % H[t252+1](line_len)
+ H[t0+5](left) = M[t1]
+ #                     167:   hM[buf_pos] = c
+ t1 = H[t252+3](buf_pos)
+ M[t1] = H[t0+1](c)
+ #                     168:   buf_pos = (buf_pos + 1) % line_len # move history buffer pointer
+ t2 = H[t252+3](buf_pos) + 1
+ t1 = t2 % H[t252+1](line_len)
+ H[t252+3](buf_pos) = t1
+ #                     169:   hH[0] = ((left << 2) + color) << 9
+ t3 = H[t0+5](left) << 2
+ t2 = t3 + H[t252+4](color)
+ t1 = t2 << 9
+ t2 = 0
+ H[t2]() = t1
+ #                     170:   hH[1] = ((upper << 2) + color) << 9
+ t3 = H[t0+2](upper) << 2
+ t2 = t3 + H[t252+4](color)
+ t1 = t2 << 9
+ t2 = 1
+ H[t2]() = t1
+ #                     171:   hH[2] = ((upper_left << 2) + color) << 9
+ t3 = H[t0+3](upper_left) << 2
+ t2 = t3 + H[t252+4](color)
+ t1 = t2 << 9
+ t2 = 2
+ H[t2]() = t1
+ #                     172:   hH[3] = ((upper_right << 2) + color) << 9
+ t3 = H[t0+4](upper_right) << 2
+ t2 = t3 + H[t252+4](color)
+ t1 = t2 << 9
+ t2 = 3
+ H[t2]() = t1
+ #                     173:   hH[4] = (((upper_left + upper + upper_right + left)//4 << 2) + color) << 9
+ t7 = H[t0+3](upper_left) + H[t0+2](upper)
+ t6 = t7 + H[t0+4](upper_right)
+ t5 = t6 + H[t0+5](left)
+ t4 = t5 / 4
+ t3 = t4 << 2
+ t2 = t3 + H[t252+4](color)
+ t1 = t2 << 9
+ t2 = 4
+ H[t2]() = t1
+ #                     174:   hH[5] = ((left << 2) + color) << 9
+ t3 = H[t0+5](left) << 2
+ t2 = t3 + H[t252+4](color)
+ t1 = t2 << 9
+ t2 = 5
+ H[t2]() = t1
+ #                     175:   hH[6] = ((upper << 2) + color) << 9
+ t3 = H[t0+2](upper) << 2
+ t2 = t3 + H[t252+4](color)
+ t1 = t2 << 9
+ t2 = 6
+ H[t2]() = t1
+ #                     176:   hH[7] = c << 9
+ t1 = H[t0+1](c) << 9
+ t2 = 7
+ H[t2]() = t1
+ #                     177:   hH[10] = (((left+upper)//2 << 2) + color) << 9
+ t5 = H[t0+5](left) + H[t0+2](upper)
+ t4 = t5 / 2
+ t3 = t4 << 2
+ t2 = t3 + H[t252+4](color)
+ t1 = t2 << 9
+ t2 = 10
+ H[t2]() = t1
+ #                     178:   hH[11] = (((((((upper_left + 512) * 773) + upper + 512) * 773) + left + 512) * 773) + color + 512) * 773 + c # 4 order hash
+ t12 = H[t0+3](upper_left) + 512
+ t11 = t12 * 773
+ t10 = t11 + H[t0+2](upper)
+ t9 = t10 + 512
+ t8 = t9 * 773
+ t7 = t8 + H[t0+5](left)
+ t6 = t7 + 512
+ t5 = t6 * 773
+ t4 = t5 + H[t252+4](color)
+ t3 = t4 + 512
+ t2 = t3 * 773
+ t1 = t2 + H[t0+1](c)
+ t2 = 11
+ H[t2]() = t1
+ #                     179:   hH[12] = color
+ t1 = 12
+ H[t1]() = H[t252+4](color)
+ #                     180:   if upper > upper_left:
+ t1 = H[t0+2](upper) > H[t0+3](upper_left)
+ ifN t1 goto else_55
+ #                     181:     dH = upper - upper_left
+ t1 = H[t0+2](upper) - H[t0+3](upper_left)
+ H[t0+6](dH) = t1
+ goto endif_56
+:else_55:
+ #                     183:     dH = upper_left - upper
+ t1 = H[t0+3](upper_left) - H[t0+2](upper)
+ H[t0+6](dH) = t1
+:endif_56:
+ #                     184:   if left > upper_left:
+ t1 = H[t0+5](left) > H[t0+3](upper_left)
+ ifN t1 goto else_58
+ #                     185:     dV = left - upper_left
+ t1 = H[t0+5](left) - H[t0+3](upper_left)
+ H[t0+7](dV) = t1
+ goto endif_59
+:else_58:
+ #                     187:     dV = upper_left - left
+ t1 = H[t0+3](upper_left) - H[t0+5](left)
+ H[t0+7](dV) = t1
+:endif_59:
+ #                     188:   if (dH + dV) < 17: # threshold for simple smooth region detection
+ t2 = H[t0+6](dH) + H[t0+7](dV)
+ t1 = t2 < 17
+ ifN t1 goto else_61
+ #                     189:     hH[9] = (4 + color) << 8
+ t2 = 4 + H[t252+4](color)
+ t1 = t2 << 8
+ t2 = 9
+ H[t2]() = t1
+ goto endif_62
+:else_61:
+ #                     191:     hH[9] = color << 8
+ t1 = H[t252+4](color) << 8
+ t2 = 9
+ H[t2]() = t1
+:endif_62:
+ #                     192:   if color_bytes_read == total_color_bytes: # await next PNM image
+ t1 = H[t252+6](color_bytes_read) == H[t252+2](total_color_bytes)
+ ifN t1 goto else_64
+ #                     193:     reading_header = True
+ H[t252+5](reading_header) = 1
+ goto endif_65
+:else_64:
+:endif_65:
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:hcomp_end~:
+ #                     195: pass
+:call_next:
+ t253 = 4294967294
+    H[t0+8]() = t0
+   # saved bsp, return id:
+   H[t0+9]() = 14
+   # push arguments:
+   H[t0+10]() = t255
+   t0 = t0 + 9
+   goto hcomp
+  :return_id_14:
+    halt
+  :find_label_ret_id:
+   t4 = t0 > 1048392
+   if t4 goto throw_error
+   ifEq t2 0 goto return_id_0
+   ifEq t2 1 goto return_id_1
+   ifEq t2 2 goto return_id_2
+   ifEq t2 3 goto return_id_3
+   ifEq t2 4 goto return_id_4
+   ifEq t2 5 goto return_id_5
+   ifEq t2 6 goto return_id_6
+   ifEq t2 7 goto return_id_7
+   ifEq t2 8 goto return_id_8
+   ifEq t2 9 goto return_id_9
+   ifEq t2 10 goto return_id_10
+   ifEq t2 11 goto return_id_11
+   ifEq t2 12 goto return_id_12
+   ifEq t2 13 goto return_id_13
+   ifEq t2 14 goto return_id_14
+  :throw_error:
+   error
+   halt
+pcomp
+    # t255 holds the inital value passed into the A register, first ZPAQL instruction must thus be r=a 255
+   ifN t0 goto init_code
+   if t254 goto cont_reading
+   goto call_next
+  :init_code:
+   t0 = 1
+   t252 = t0
+   goto read_b_end~
+  :read_b:
+   t1 = t253 == 4294967294
+   if t1 goto do_read_in
+   t255 = t253
+   t253 = 4294967294
+   goto cont_reading
+  :do_read_in:
+   t254 = 1
+   halt
+  :cont_reading:
+   t254 = 0
+      t1 = t255
+     t2 = H[t0]()
+     t0 = t0 - 1
+     t0 = H[t0]()
+     goto find_label_ret_id
+  :read_b_end~:
+ #                     200: def pcomp_read_after_whitespace():
+ goto pcomp_read_after_whitespace_end~
+:pcomp_read_after_whitespace:
+ MarkTempVarStart
+ #                     201:   while True:
+:while_1:
+ ifN 1 goto whileend_3
+ #                     202:     c = read_b()
+ 
+    H[t0+1]() = t0
+   # saved bsp, return id:
+   H[t0+2]() = 0
+   # push arguments:
+   t0 = t0 + 2
+   goto read_b
+  :return_id_0:
+ 
+ H[t0+1](c) = t1
+ #                     203:     if c == 0x20 or c == 9 or c == 10 or c == 13: # skip whitespace
+ t4 = H[t0+1](c) == 32
+ t5 = H[t0+1](c) == 9
+ t3 = t4 or t5
+ t4 = H[t0+1](c) == 10
+ t2 = t3 or t4
+ t3 = H[t0+1](c) == 13
+ t1 = t2 or t3
+ ifN t1 goto else_8
+ #                     204:       out(c)
+ out H[t0+1](c)
+ #                     205:       continue
+ goto while_1
+ goto endif_9
+:else_8:
+ #                     206:     elif c == 0x23: # skip comment line
+ t1 = H[t0+1](c) == 35
+ ifN t1 goto else_11
+ #                     207:      while c != 10 and c != 13:
+:while_13:
+ t2 = H[t0+1](c) != 10
+ t3 = H[t0+1](c) != 13
+ t1 = t2 and t3
+ ifN t1 goto whileend_15
+ #                     208:        out(c)
+ out H[t0+1](c)
+ #                     209:        c = read_b()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 1
+   # push arguments:
+   t0 = t0 + 3
+   goto read_b
+  :return_id_1:
+ 
+ H[t0+1](c) = t1
+ goto while_13
+:whileend_15:
+ #                     210:      out(c)
+ out H[t0+1](c)
+ goto endif_12
+:else_11:
+ #                     212:       return c
+    t1 = H[t0+1](c)
+   t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+:endif_12:
+:endif_9:
+ goto while_1
+:whileend_3:
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:pcomp_read_after_whitespace_end~:
+ #                     214: def pcomp_read_after_header():
+ goto pcomp_read_after_header_end~
+:pcomp_read_after_header:
+ MarkTempVarStart
+ #                     215:   c = pcomp_read_after_whitespace() # skip over first delimiter
+ 
+    H[t0+1]() = t0
+   # saved bsp, return id:
+   H[t0+2]() = 2
+   # push arguments:
+   t0 = t0 + 2
+   goto pcomp_read_after_whitespace
+  :return_id_2:
+ 
+ H[t0+1](c) = t1
+ #                     216:   out(c)
+ out H[t0+1](c)
+ #                     217:   z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ #                     218:   while z < 10 and z >= 0:  # read width
+:while_18:
+ t2 = H[t0+2](z) < 10
+ t3 = H[t0+2](z) >= 0
+ t1 = t2 and t3
+ ifN t1 goto whileend_20
+ #                     219:     c = read_b()
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 3
+   # push arguments:
+   t0 = t0 + 4
+   goto read_b
+  :return_id_3:
+ 
+ H[t0+1](c) = t1
+ #                     220:     out(c)
+ out H[t0+1](c)
+ #                     221:     z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ goto while_18
+:whileend_20:
+ #                     222:   c = pcomp_read_after_whitespace()
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 4
+   # push arguments:
+   t0 = t0 + 4
+   goto pcomp_read_after_whitespace
+  :return_id_4:
+ 
+ H[t0+1](c) = t1
+ #                     223:   out(c)
+ out H[t0+1](c)
+ #                     224:   z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ #                     225:   while z < 10 and z >= 0:  # skip height
+:while_23:
+ t2 = H[t0+2](z) < 10
+ t3 = H[t0+2](z) >= 0
+ t1 = t2 and t3
+ ifN t1 goto whileend_25
+ #                     226:     c = read_b()
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 5
+   # push arguments:
+   t0 = t0 + 4
+   goto read_b
+  :return_id_5:
+ 
+ H[t0+1](c) = t1
+ #                     227:     out(c)
+ out H[t0+1](c)
+ #                     228:     z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ goto while_23
+:whileend_25:
+ #                     229:   c = pcomp_read_after_whitespace()
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 6
+   # push arguments:
+   t0 = t0 + 4
+   goto pcomp_read_after_whitespace
+  :return_id_6:
+ 
+ H[t0+1](c) = t1
+ #                     230:   out(c)
+ out H[t0+1](c)
+ #                     231:   z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ #                     232:   while z < 10 and z >= 0:
+:while_28:
+ t2 = H[t0+2](z) < 10
+ t3 = H[t0+2](z) >= 0
+ t1 = t2 and t3
+ ifN t1 goto whileend_30
+ #                     233:     c = read_b()
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 7
+   # push arguments:
+   t0 = t0 + 4
+   goto read_b
+  :return_id_7:
+ 
+ H[t0+1](c) = t1
+ #                     234:     out(c)
+ out H[t0+1](c)
+ #                     235:     z = c - 0x30
+ t1 = H[t0+1](c) - 48
+ H[t0+2](z) = t1
+ goto while_28
+:whileend_30:
+ #                     237:   return read_b() # read first color byte
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 8
+   # push arguments:
+   t0 = t0 + 4
+   goto read_b
+  :return_id_8:
+ 
+    t1 = t1
+   t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:pcomp_read_after_header_end~:
+ #                     239: pcomp_reading_header = True
+ H[t0+1](pcomp_reading_header) = 1
+ #                     240: pcomp_color = 0
+ H[t0+2](pcomp_color) = 0
+ #                     241: g = 0
+ H[t0+3](g) = 0
+ #                     243: def pcomp(c):  # passing c is like having c = read_b() as first line
+ goto pcomp_end~
+:pcomp:
+ MarkTempVarStart
+ # Arg c at t0 + 1
+ #                     244:   global pcomp_reading_header, pcomp_color, g
+ # Global pcomp_reading_header via H[t252+1]
+ # Global pcomp_color via H[t252+2]
+ # Global g via H[t252+3]
+ #                     245:   if c == NONE:
+ t1 = H[t0+1](c) == 4294967295
+ ifN t1 goto else_34
+ #                     246:     pcomp_reading_header = True
+ H[t252+1](pcomp_reading_header) = 1
+ #                     247:     return
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ goto endif_35
+:else_34:
+:endif_35:
+ #                     248:   pcomp_color = (pcomp_color + 1) % 3
+ t2 = H[t252+2](pcomp_color) + 1
+ t1 = t2 % 3
+ H[t252+2](pcomp_color) = t1
+ #                     249:   if pcomp_reading_header and c == 0x50:
+ t2 = H[t0+1](c) == 80
+ t1 = H[t252+1](pcomp_reading_header) and t2
+ ifN t1 goto else_37
+ #                     250:     out(c)
+ out H[t0+1](c)
+ #                     251:     c = read_b()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 9
+   # push arguments:
+   t0 = t0 + 3
+   goto read_b
+  :return_id_9:
+ 
+ H[t0+1](c) = t1
+ #                     252:     if c == 0x36: # detected header P6
+ t1 = H[t0+1](c) == 54
+ ifN t1 goto else_40
+ #                     253:       out(c)
+ out H[t0+1](c)
+ #                     254:       c = pcomp_read_after_header()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 10
+   # push arguments:
+   t0 = t0 + 3
+   goto pcomp_read_after_header
+  :return_id_10:
+ 
+ H[t0+1](c) = t1
+ #                     255:       pcomp_color = 0  # red
+ H[t252+2](pcomp_color) = 0
+ #                     256:       pcomp_reading_header = False
+ H[t252+1](pcomp_reading_header) = 0
+ goto endif_41
+:else_40:
+:endif_41:
+ goto endif_38
+:else_37:
+:endif_38:
+ #                     257:   if pcomp_color == 1:
+ t1 = H[t252+2](pcomp_color) == 1
+ ifN t1 goto else_43
+ #                     259:     out(c)
+ out H[t0+1](c)
+ #                     260:     pcomp_color = 0
+ H[t252+2](pcomp_color) = 0
+ goto endif_44
+:else_43:
+ #                     261:   elif pcomp_color == 0:
+ t1 = H[t252+2](pcomp_color) == 0
+ ifN t1 goto else_46
+ #                     262:     r = c
+ H[t0+2](r) = H[t0+1](c)
+ #                     263:     c = read_b()
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 11
+   # push arguments:
+   t0 = t0 + 4
+   goto read_b
+  :return_id_11:
+ 
+ H[t0+1](c) = t1
+ #                     264:     out((r+c) % 256)
+ t2 = H[t0+2](r) + H[t0+1](c)
+ t1 = t2 % 256
+ out t1
+ #                     265:     out(c)
+ out H[t0+1](c)
+ #                     266:     g = c
+ H[t252+3](g) = H[t0+1](c)
+ #                     267:     pcomp_color = 1
+ H[t252+2](pcomp_color) = 1
+ goto endif_47
+:else_46:
+ #                     268:   elif pcomp_color == 2:
+ t1 = H[t252+2](pcomp_color) == 2
+ ifN t1 goto else_49
+ #                     269:     out((c+g) % 256)
+ t2 = H[t0+1](c) + H[t252+3](g)
+ t1 = t2 % 256
+ out t1
+ goto endif_50
+:else_49:
+:endif_50:
+:endif_47:
+:endif_44:
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:pcomp_end~:
+ #                     271: pass
+:call_next:
+ t253 = 4294967294
+    H[t0+4]() = t0
+   # saved bsp, return id:
+   H[t0+5]() = 12
+   # push arguments:
+   H[t0+6]() = t255
+   t0 = t0 + 5
+   goto pcomp
+  :return_id_12:
+    halt
+  :find_label_ret_id:
+   t4 = t0 > 1048377
+   if t4 goto throw_error
+   ifEq t2 0 goto return_id_0
+   ifEq t2 1 goto return_id_1
+   ifEq t2 2 goto return_id_2
+   ifEq t2 3 goto return_id_3
+   ifEq t2 4 goto return_id_4
+   ifEq t2 5 goto return_id_5
+   ifEq t2 6 goto return_id_6
+   ifEq t2 7 goto return_id_7
+   ifEq t2 8 goto return_id_8
+   ifEq t2 9 goto return_id_9
+   ifEq t2 10 goto return_id_10
+   ifEq t2 11 goto return_id_11
+   ifEq t2 12 goto return_id_12
+  :throw_error:
+   error
+   halt
+end

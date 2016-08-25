@@ -1,0 +1,429 @@
+comp 21 0 21 24 1 (hh hm ph pm n)
+  0 icm 12
+hcomp
+    # t255 holds the inital value passed into the A register, first ZPAQL instruction must thus be r=a 255
+   ifN t0 goto init_code
+   if t254 goto cont_reading
+   goto call_next
+  :init_code:
+   t0 = 1
+   t252 = t0
+   goto read_b_end~
+  :read_b:
+   t1 = t253 == 4294967294
+   if t1 goto do_read_in
+   t255 = t253
+   t253 = 4294967294
+   goto cont_reading
+  :do_read_in:
+   t254 = 1
+   halt
+  :cont_reading:
+   t254 = 0
+      t1 = t255
+     t2 = H[t0]()
+     t0 = t0 - 1
+     t0 = H[t0]()
+     goto find_label_ret_id
+  :read_b_end~:
+ #                     20: pass
+ #                     154: h_state = 5
+ H[t0+1](h_state) = 5
+ #                     155: first_run = True
+ H[t0+2](first_run) = 1
+ #                     157: def hcomp(c):  # pcomp bytecode is passed first (or 0 if there is none)
+ goto hcomp_end~
+:hcomp:
+ MarkTempVarStart
+ # Arg c at t0 + 1
+ #                     160:   global h_state, first_run
+ # Global h_state via H[t252+1]
+ # Global first_run via H[t252+2]
+ #                     161:   if first_run:
+ ifN H[t252+2](first_run) goto else_1
+ #                     162:     first_run = False  # skip pcomp bytecode
+ H[t252+2](first_run) = 0
+ #                     163:     if c == 0:
+ t1 = H[t0+1](c) == 0
+ ifN t1 goto else_4
+ #                     164:       return
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ goto endif_5
+:else_4:
+:endif_5:
+ #                     165:     if c == 1:
+ t1 = H[t0+1](c) == 1
+ ifN t1 goto else_7
+ #                     166:       c = read_b()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 0
+   # push arguments:
+   t0 = t0 + 3
+   goto read_b
+  :return_id_0:
+ 
+ H[t0+1](c) = t1
+ #                     167:       c += read_b()*256 # read length
+ 
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 1
+   # push arguments:
+   t0 = t0 + 4
+   goto read_b
+  :return_id_1:
+ t2 = t1
+ 
+ t1 = t2 * 256
+ H[t0+1](c) = H[t0+1](c) + t1
+ #                     168:       while c > 0:
+:while_9:
+ t1 = H[t0+1](c) > 0
+ ifN t1 goto whileend_11
+ #                     169:         hH[0] = read_b()
+ 
+    H[t0+2]() = t0
+   # saved bsp, return id:
+   H[t0+3]() = 2
+   # push arguments:
+   t0 = t0 + 3
+   goto read_b
+  :return_id_2:
+ 
+ t2 = 0
+ H[t2]() = t1
+ #                     170:         c -= 1
+ H[t0+1](c) = H[t0+1](c) - 1
+ goto while_9
+:whileend_11:
+ #                     171:       return
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ goto endif_8
+:else_7:
+:endif_8:
+ goto endif_2
+:else_1:
+:endif_2:
+ #                     172:   if h_state == 1:  # (expect code ccxxxxxx as input) (cc is number of offset bytes following) (00xxxxxx means x+1 literal bytes follow)
+ t1 = H[t252+1](h_state) == 1
+ ifN t1 goto else_14
+ #                     173:     a=c
+ H[t0+2](a) = H[t0+1](c)
+ #                     174:     a>>= 6
+ H[t0+2](a) = H[t0+2](a) >> 6
+ #                     175:     a&= 3
+ H[t0+2](a) = H[t0+2](a) & 3
+ #                     176:     if a > 0:
+ t1 = H[t0+2](a) > 0
+ ifN t1 goto else_17
+ #                     177:       a += 1
+ H[t0+2](a) = H[t0+2](a) + 1
+ #                     178:       h_state = a
+ H[t252+1](h_state) = H[t0+2](a)
+ #                     179:       a = c
+ H[t0+2](a) = H[t0+1](c)
+ #                     180:       a>>= 3
+ H[t0+2](a) = H[t0+2](a) >> 3
+ #                     181:       hH[0] = ( a + 512) * 773
+ t2 = H[t0+2](a) + 512
+ t1 = t2 * 773
+ t2 = 0
+ H[t2]() = t1
+ goto endif_18
+:else_17:
+ #                     183:       a = c
+ H[t0+2](a) = H[t0+1](c)
+ #                     184:       a&= 63
+ H[t0+2](a) = H[t0+2](a) & 63
+ #                     185:       a+= 5
+ H[t0+2](a) = H[t0+2](a) + 5
+ #                     186:       h_state = a
+ H[t252+1](h_state) = H[t0+2](a)
+ #                     187:       a = c
+ H[t0+2](a) = H[t0+1](c)
+ #                     188:       hH[0] = ( a + 512) * 773
+ t2 = H[t0+2](a) + 512
+ t1 = t2 * 773
+ t2 = 0
+ H[t2]() = t1
+:endif_18:
+ goto endif_15
+:else_14:
+ #                     189:   elif h_state == 5: # (end of literal) # + #  (init)
+ t1 = H[t252+1](h_state) == 5
+ ifN t1 goto else_20
+ #                     190:     h_state = 1
+ H[t252+1](h_state) = 1
+ #                     191:     hH[0] = 0
+ t1 = 0
+ H[t1]() = 0
+ goto endif_21
+:else_20:
+ #                     193:     if h_state > 5:
+ t1 = H[t252+1](h_state) > 5
+ ifN t1 goto else_23
+ #                     194:       hH[0] = (c + 512) * 773
+ t2 = H[t0+1](c) + 512
+ t1 = t2 * 773
+ t2 = 0
+ H[t2]() = t1
+ goto endif_24
+:else_23:
+:endif_24:
+ #                     195:     h_state -= 1
+ H[t252+1](h_state) = H[t252+1](h_state) - 1
+:endif_21:
+:endif_15:
+ #                     196:   c = h_state
+ H[t0+1](c) = H[t252+1](h_state)
+ #                     197:   if h_state > 5:
+ t1 = H[t252+1](h_state) > 5
+ ifN t1 goto else_26
+ #                     198:     c = 5
+ H[t0+1](c) = 5
+ goto endif_27
+:else_26:
+:endif_27:
+ #                     199:   hH[0] = (hH[0] + c + 512) * 773
+ t4 = 0
+ t3 = H[t4]() + H[t0+1](c)
+ t2 = t3 + 512
+ t1 = t2 * 773
+ t2 = 0
+ H[t2]() = t1
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:hcomp_end~:
+ #                     201: pass
+:call_next:
+ t253 = 4294967294
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 3
+   # push arguments:
+   H[t0+5]() = t255
+   t0 = t0 + 4
+   goto hcomp
+  :return_id_3:
+    halt
+  :find_label_ret_id:
+   t4 = t0 > 1048377
+   if t4 goto throw_error
+   ifEq t2 0 goto return_id_0
+   ifEq t2 1 goto return_id_1
+   ifEq t2 2 goto return_id_2
+   ifEq t2 3 goto return_id_3
+  :throw_error:
+   error
+   halt
+pcomp
+    # t255 holds the inital value passed into the A register, first ZPAQL instruction must thus be r=a 255
+   ifN t0 goto init_code
+   if t254 goto cont_reading
+   goto call_next
+  :init_code:
+   t0 = 1
+   t252 = t0
+   goto read_b_end~
+  :read_b:
+   t1 = t253 == 4294967294
+   if t1 goto do_read_in
+   t255 = t253
+   t253 = 4294967294
+   goto cont_reading
+  :do_read_in:
+   t254 = 1
+   halt
+  :cont_reading:
+   t254 = 0
+      t1 = t255
+     t2 = H[t0]()
+     t0 = t0 - 1
+     t0 = H[t0]()
+     goto find_label_ret_id
+  :read_b_end~:
+ #                     20: pass
+ #                     218: i = 0  # position in 16M output buffer
+ H[t0+1](i) = 0
+ #                     219: state = 0
+ H[t0+2](state) = 0
+ #                     220: leng = 0  # length of match or literal
+ H[t0+3](leng) = 0
+ #                     221: off = 0  # offset of match back from i
+ H[t0+4](off) = 0
+ #                     222: BUFSIZE_max = (1<<24) - 1
+ t2 = 1 << 24
+ t1 = t2 - 1
+ H[t0+5](BUFSIZE_max) = t1
+ #                     224: def pcomp(c):  # passing c is like having c = read_b() as first line
+ goto pcomp_end~
+:pcomp:
+ MarkTempVarStart
+ # Arg c at t0 + 1
+ #                     227:   global i, state, leng, off
+ # Global i via H[t252+1]
+ # Global state via H[t252+2]
+ # Global leng via H[t252+3]
+ # Global off via H[t252+4]
+ #                     228:   if c == NONE:  # restart
+ t1 = H[t0+1](c) == 4294967295
+ ifN t1 goto else_2
+ #                     229:     i = 0
+ H[t252+1](i) = 0
+ #                     230:     state = 0
+ H[t252+2](state) = 0
+ #                     231:     leng = 0
+ H[t252+3](leng) = 0
+ #                     232:     off = 0
+ H[t252+4](off) = 0
+ #                     233:     return
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ goto endif_3
+:else_2:
+:endif_3:
+ #                     234:   if state == 0: # expecting a literal or match code
+ t1 = H[t252+2](state) == 0
+ ifN t1 goto else_5
+ #                     235:     state = 1+(c>>6)
+ t2 = H[t0+1](c) >> 6
+ t1 = 1 + t2
+ H[t252+2](state) = t1
+ #                     236:     if state == 1: # literal
+ t1 = H[t252+2](state) == 1
+ ifN t1 goto else_8
+ #                     237:       off = 0
+ H[t252+4](off) = 0
+ #                     238:       leng = c+1
+ t1 = H[t0+1](c) + 1
+ H[t252+3](leng) = t1
+ goto endif_9
+:else_8:
+ #                     239:     elif state==2: # short match
+ t1 = H[t252+2](state) == 2
+ ifN t1 goto else_11
+ #                     240:       off = c&7
+ t1 = H[t0+1](c) & 7
+ H[t252+4](off) = t1
+ #                     241:       leng = (c>>3)-3
+ t2 = H[t0+1](c) >> 3
+ t1 = t2 - 3
+ H[t252+3](leng) = t1
+ goto endif_12
+:else_11:
+ #                     243:       off = 0
+ H[t252+4](off) = 0
+ #                     244:       leng = (c&63)+1  # match
+ t2 = H[t0+1](c) & 63
+ t1 = t2 + 1
+ H[t252+3](leng) = t1
+:endif_12:
+:endif_9:
+ goto endif_6
+:else_5:
+ #                     245:   elif state == 1: # decoding a literal with leng bytes remaining
+ t1 = H[t252+2](state) == 1
+ ifN t1 goto else_14
+ #                     246:     out(c)
+ out H[t0+1](c)
+ #                     247:     pM[i&BUFSIZE_max] = c
+ t1 = H[t252+1](i) & H[t252+5](BUFSIZE_max)
+ M[t1] = H[t0+1](c)
+ #                     248:     i += 1
+ H[t252+1](i) = H[t252+1](i) + 1
+ #                     249:     leng -= 1
+ H[t252+3](leng) = H[t252+3](leng) - 1
+ #                     250:     if leng == 0:
+ t1 = H[t252+3](leng) == 0
+ ifN t1 goto else_17
+ #                     251:       state = 0
+ H[t252+2](state) = 0
+ goto endif_18
+:else_17:
+:endif_18:
+ goto endif_15
+:else_14:
+ #                     252:   elif state > 2: # state==3, state==4: expecting 2,3 match offset bytes
+ t1 = H[t252+2](state) > 2
+ ifN t1 goto else_20
+ #                     253:     off = off<<8|c
+ t2 = H[t252+4](off) << 8
+ t1 = t2 | H[t0+1](c)
+ H[t252+4](off) = t1
+ #                     254:     state -= 1
+ H[t252+2](state) = H[t252+2](state) - 1
+ goto endif_21
+:else_20:
+ #                     256:     off = off<<8|c
+ t2 = H[t252+4](off) << 8
+ t1 = t2 | H[t0+1](c)
+ H[t252+4](off) = t1
+ #                     257:     off = i-off-1
+ t2 = H[t252+1](i) - H[t252+4](off)
+ t1 = t2 - 1
+ H[t252+4](off) = t1
+ #                     258:     while leng:
+:while_22:
+ ifN H[t252+3](leng) goto whileend_24
+ #                     259:       c=pM[off&BUFSIZE_max]
+ t1 = H[t252+4](off) & H[t252+5](BUFSIZE_max)
+ H[t0+1](c) = M[t1]
+ #                     260:       pM[i&BUFSIZE_max]=c
+ t1 = H[t252+1](i) & H[t252+5](BUFSIZE_max)
+ M[t1] = H[t0+1](c)
+ #                     261:       i += 1
+ H[t252+1](i) = H[t252+1](i) + 1
+ #                     262:       off += 1
+ H[t252+4](off) = H[t252+4](off) + 1
+ #                     263:       out(c)
+ out H[t0+1](c)
+ #                     264:       leng -= 1
+ H[t252+3](leng) = H[t252+3](leng) - 1
+ goto while_22
+:whileend_24:
+ #                     265:     state = 0
+ H[t252+2](state) = 0
+:endif_21:
+:endif_15:
+:endif_6:
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:pcomp_end~:
+ #                     267: pass
+:call_next:
+ t253 = 4294967294
+    H[t0+6]() = t0
+   # saved bsp, return id:
+   H[t0+7]() = 0
+   # push arguments:
+   H[t0+8]() = t255
+   t0 = t0 + 7
+   goto pcomp
+  :return_id_0:
+    halt
+  :find_label_ret_id:
+   t4 = t0 > 1048377
+   if t4 goto throw_error
+   ifEq t2 0 goto return_id_0
+  :throw_error:
+   error
+   halt
+end

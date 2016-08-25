@@ -1,0 +1,10 @@
+target
+zpaq
+zpaqd
+zpaqlpy
+zpaqlpydebug
+src/grammar.rs
+*.py~
+*.py.swp
+*.rs~
+*.rs.swp

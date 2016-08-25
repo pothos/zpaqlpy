@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+# Copyright (C) 2016 Kai Lüke kailueke@riseup.net
+# This program comes with ABSOLUTELY NO WARRANTY and is free software, you are welcome to redistribute it
+# under certain conditions, see https://www.gnu.org/licenses/gpl-3.0.en.html
+
+# c in out
+# d in out
+import sys
+from collections import deque
+
+input = sys.argv[1]
+output = sys.argv[2]
+
+def out(c):
+  data.append(c)
+
+def read_after_whitespace():
+  while True:
+    c = read_b()
+    if c == 0x20 or c == 9 or c == 10 or c == 13: # skip whitespace
+      out(c)
+      continue
+    elif c == 0x23: # skip comment line
+     while c != 10 and c != 13:
+       out(c)
+       c = read_b()
+     out(c)
+    else:
+      return c
+
+def read_after_header():
+  c = read_after_whitespace() # skip over first delimiter
+  out(c)
+  z = c - 0x30
+  while z < 10 and z >= 0:  # read width
+    c = read_b()
+    out(c)
+    z = c - 0x30
+  c = read_after_whitespace()
+  out(c)
+  z = c - 0x30
+  while z < 10 and z >= 0:  # skip height
+    c = read_b()
+    out(c)
+    z = c - 0x30
+  c = read_after_whitespace()
+  out(c)
+  z = c - 0x30
+  maxc = 0
+  while z < 10 and z >= 0:
+    maxc *= 10
+    maxc += z
+    c = read_b()
+    out(c)
+    z = c - 0x30
+  if maxc > 255:
+    raise Exception("Only three 8-bit RGB channels supported")
+  c = read_after_whitespace() # read first color byte
+  return c
+
+input_buf = []
+data = deque([])
+def read_b():
+  if len(input_buf) == 0:
+    return None
+  return input_buf.popleft()
+
+def convert():
+  global input_buf
+  reading_header = True
+  color = 0
+  with open(input, mode='rb') as fi:
+    with open(output, mode='wb') as fo:
+      input_buf = deque(fi.read())
+      while True:
+        c = read_b()
+        if c is None:
+          break
+        color = (color + 1) % 3
+        if reading_header and c == 0x50:
+          out(c)
+          c = read_b()
+          if c == 0x36: # detected header P6
+            out(c)
+            c = read_after_header()
+            color = 0  # red
+            reading_header = False
+        if color == 1:
+          # wrong data
+          out(c)
+          color = 0
+        elif color == 0:
+          r = c
+          c = read_b()
+          if c is None:
+            out(r)
+            break
+          out((256+r-c) % 256)
+          out(c)
+          g = c
+          color = 1
+        elif color == 2:
+          out((256+c-g) % 256)
+      # write out
+      fo.write(bytes(data))
+
+convert()

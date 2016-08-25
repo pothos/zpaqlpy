@@ -1,0 +1,207 @@
+comp 21 0 21 0 3 (hh hm ph pm n)
+  0 cm 19 22
+  1 cm 19 22
+  2 mix2 1 0 1 30 0
+hcomp
+    # t255 holds the inital value passed into the A register, first ZPAQL instruction must thus be r=a 255
+   ifN t0 goto init_code
+   if t254 goto cont_reading
+   goto call_next
+  :init_code:
+   t0 = 4
+   t252 = t0
+   goto read_b_end~
+  :read_b:
+   t1 = t253 == 4294967294
+   if t1 goto do_read_in
+   t255 = t253
+   t253 = 4294967294
+   goto cont_reading
+  :do_read_in:
+   t254 = 1
+   halt
+  :cont_reading:
+   t254 = 0
+      t1 = t255
+     t2 = H[t0]()
+     t0 = t0 - 1
+     t0 = H[t0]()
+     goto find_label_ret_id
+  :read_b_end~:
+ #                     21: pass
+ #                     159: at_counter = False  # if false, then c is byte, otherwise c is a counter
+ H[t0+1](at_counter) = 0
+ #                     160: last_value = 0
+ H[t0+2](last_value) = 0
+ #                     161: last_counter = 0
+ H[t0+3](last_counter) = 0
+ #                     163: def hcomp(c):  # pcomp bytecode is passed first (or 0 if there is none)
+ goto hcomp_end~
+:hcomp:
+ MarkTempVarStart
+ # Arg c at t0 + 1
+ #                     164:   global at_counter, last_value, last_counter
+ # Global at_counter via H[t252+1]
+ # Global last_value via H[t252+2]
+ # Global last_counter via H[t252+3]
+ #                     165:   if at_counter:
+ ifN H[t252+1](at_counter) goto else_1
+ #                     166:     last_counter = c
+ H[t252+3](last_counter) = H[t0+1](c)
+ goto endif_2
+:else_1:
+ #                     168:     last_value = c
+ H[t252+2](last_value) = H[t0+1](c)
+:endif_2:
+ #                     171:   hH[0] = (last_value << 1) + at_counter  # at_counter will occupy one bit, therefore shift
+ t2 = H[t252+2](last_value) << 1
+ t1 = t2 + H[t252+1](at_counter)
+ t2 = 0
+ H[t2]() = t1
+ #                     172:   hH[0] <<= 9  # again shift to the side because of the xor with the partially decoded byte
+ t1 = 0
+ H[t1]() = H[t1]() << 9
+ #                     174:   hH[1] = (last_counter << 1) + at_counter
+ t2 = H[t252+3](last_counter) << 1
+ t1 = t2 + H[t252+1](at_counter)
+ t2 = 1
+ H[t2]() = t1
+ #                     175:   hH[1] <<= 9
+ t1 = 1
+ H[t1]() = H[t1]() << 9
+ #                     176:   hH[2] = at_counter + 0  # context for mixer: is at counter (1) or not (0)
+ t1 = H[t252+1](at_counter) + 0
+ t2 = 2
+ H[t2]() = t1
+ #                     177:   at_counter = not at_counter
+ t1 = ! H[t252+1](at_counter)
+ H[t252+1](at_counter) = t1
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:hcomp_end~:
+ #                     181: pass
+:call_next:
+ t253 = 4294967294
+    H[t0+4]() = t0
+   # saved bsp, return id:
+   H[t0+5]() = 0
+   # push arguments:
+   H[t0+6]() = t255
+   t0 = t0 + 5
+   goto hcomp
+  :return_id_0:
+    halt
+  :find_label_ret_id:
+   t4 = t0 > 1048380
+   if t4 goto throw_error
+   ifEq t2 0 goto return_id_0
+  :throw_error:
+   error
+   halt
+pcomp
+    # t255 holds the inital value passed into the A register, first ZPAQL instruction must thus be r=a 255
+   ifN t0 goto init_code
+   if t254 goto cont_reading
+   goto call_next
+  :init_code:
+   t0 = 1
+   t252 = t0
+   goto read_b_end~
+  :read_b:
+   t1 = t253 == 4294967294
+   if t1 goto do_read_in
+   t255 = t253
+   t253 = 4294967294
+   goto cont_reading
+  :do_read_in:
+   t254 = 1
+   halt
+  :cont_reading:
+   t254 = 0
+      t1 = t255
+     t2 = H[t0]()
+     t0 = t0 - 1
+     t0 = H[t0]()
+     goto find_label_ret_id
+  :read_b_end~:
+ #                     21: pass
+ #                     189: case_loading = False
+ H[t0+1](case_loading) = 0
+ #                     190: last = NONE
+ H[t0+2](last) = 4294967295
+ #                     192: def pcomp(c):
+ goto pcomp_end~
+:pcomp:
+ MarkTempVarStart
+ # Arg c at t0 + 1
+ #                     193:   global case_loading, last
+ # Global case_loading via H[t252+1]
+ # Global last via H[t252+2]
+ #                     194:   if c == NONE:  # start of new segment, so restart our code
+ t1 = H[t0+1](c) == 4294967295
+ ifN t1 goto else_2
+ #                     195:     case_loading = False
+ H[t252+1](case_loading) = 0
+ #                     196:     last = NONE
+ H[t252+2](last) = 4294967295
+ #                     197:     return
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ goto endif_3
+:else_2:
+:endif_3:
+ #                     198:   if not case_loading:  # c is byte to load
+ t1 = ! H[t252+1](case_loading)
+ ifN t1 goto else_4
+ #                     199:     case_loading = True
+ H[t252+1](case_loading) = 1
+ #                     200:     last = c
+ H[t252+2](last) = H[t0+1](c)
+ goto endif_5
+:else_4:
+ #                     202:     case_loading = False
+ H[t252+1](case_loading) = 0
+ #                     203:     while c > 0:
+:while_6:
+ t1 = H[t0+1](c) > 0
+ ifN t1 goto whileend_8
+ #                     204:       c-= 1
+ H[t0+1](c) = H[t0+1](c) - 1
+ #                     205:       out(last)
+ out H[t252+2](last)
+ goto while_6
+:whileend_8:
+:endif_5:
+ # insert return as it might not be done by the function:
+    t2 = H[t0]()
+   t0 = t0 - 1
+   t0 = H[t0]()
+   goto find_label_ret_id
+ MarkTempVarEnd
+:pcomp_end~:
+ #                     208: pass
+:call_next:
+ t253 = 4294967294
+    H[t0+3]() = t0
+   # saved bsp, return id:
+   H[t0+4]() = 0
+   # push arguments:
+   H[t0+5]() = t255
+   t0 = t0 + 4
+   goto pcomp
+  :return_id_0:
+    halt
+  :find_label_ret_id:
+   t4 = t0 > 1048377
+   if t4 goto throw_error
+   ifEq t2 0 goto return_id_0
+  :throw_error:
+   error
+   halt
+end
