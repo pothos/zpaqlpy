@@ -12,7 +12,10 @@ The Python source files are standalone executable with Python 3 (tested: 3.4, 3.
 Jump to the end for a tutorial or look into test/lz1.py, test/pnm.py or test/brotli.py for an example.
 
 Build with: `make zpaqlpy`
+
 To build again: `make clean`
+
+[B.Sc. Thesis](https://github.com/pothos/papers/raw/master/BSc_thesis_ZPAQL_compiler.pdf)
 
 Copyright (C) 2016 Kai Lüke kailueke@riseup.net
 
