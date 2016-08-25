@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 The ZPAQ format and the zpaq archiver
 =====================================
 
-*** The ZPAQ Open Standard Format for Highly Compressed Data ***
+**The ZPAQ Open Standard Format for Highly Compressed Data**
 
 Based on the idea to deliver the decompression algorithm together with
 the compressed data this archive format wants to solve the problem that
@@ -52,7 +52,7 @@ like the context computation code before the compressed data begins.
 
 Specification: http://mattmahoney.net/dc/zpaq206.pdf
 
-*** zpaq - Incremental Journaling Backup Utility and Archiver ***
+**zpaq - Incremental Journaling Backup Utility and Archiver**
 
 The end user archiver supports incremental backups with deduplication as
 well as flat streaming archives (ZPAQ format Level 1). It picks simple
@@ -64,7 +64,7 @@ variety of specialised and universal methods is available.
 Homepage: http://mattmahoney.net/dc/zpaq.html
 Working principle: http://mattmahoney.net/dc/zpaq_compression.pdf
 
-*** zpaqd - development tool for new algorithms ***
+**zpaqd - development tool for new algorithms**
 
 The zpaqd development tool only allows creation of streaming mode
 archives, but therefore accepts a ZPAQ configuration file containing
@@ -80,13 +80,13 @@ Homepage: http://mattmahoney.net/dc/zpaqutil.html
 The zpaqlpy Python-subset
 =========================
 
-*** Grammar ***
+**Grammar**
 
 For user-defined sections of the template. Not all is supported but anyway
 included for specific error messages instead of parser errors (e.g. nonlocal,
 dicts, strings or the @-operator for matrix multiplication).
 Listed here are productions with NUMBER, NAME, ”symbols”, NEWLINE, INDENT,
-DEDENT or STRING as terminals, nonterminals are defined on the left side of ->.
+DEDENT or STRING as terminals, nonterminals are defined on the left side of the -> arrow.
 
     Prog -> (NEWLINE* stmt)* ENDMARKER?
     funcdef -> ”def” NAME Parameters ”:” suite
@@ -135,7 +135,7 @@ DEDENT or STRING as terminals, nonterminals are defined on the left side of ->.
     dictorsetmaker_t -> test ”:” test
     arglist -> test (”,” test)* ”,”?
 
-*** Notes ***
+**Notes**
 
 An input has to be organised like the template, so best is to fill it out with
 the values for hh, hm, ph, pm like in a ZPAQ configuration to define the size of
@@ -154,7 +154,7 @@ running the plain Python script)
 Only positive 32-bit integers can be used, no strings, lists, arbitrary big
 numbers, classes, closures and (function) objects.
 
-*** Input File ***
+**Input File**
 
 Must be a runnable Python 3.5 file in form of the template and encoded as UTF-8
 without a BOM (Byte-Order-Mark). The definitions at the beginning should be
@@ -162,21 +162,14 @@ altered and own code inserted only behind. The other two editable sections can
 refer to definitions in the first section.
 
         Template Sections (--emit-template > source.py)         |   Editable?
-================================================================|==============
-  Definition of the ZPAQ configuration header data (memory size,|
-  context mixing components) and optionally functions and       |
-  variables used by both hcomp and pcomp                        |      yes
-________________________________________________________________|______________
+----------------------------------------------------------------|--------------
+  Definition of the ZPAQ configuration header data (memory size, context mixing components) and optionally functions and variables used by both hcomp and pcomp                        |      yes
   API functions for input and output, initialization of memory  |       no
-________________________________________________________________|______________
   function hcomp and associated global variables and functions  |      yes
-________________________________________________________________|______________
   function pcomp and associated global variables and functions  |      yes
-________________________________________________________________|______________
-  code for standalone execution of the Python file analog to    |
-  running a ZPAQL configuration with zpaqd r [cfg] p|h          |       no
+  code for standalone execution of the Python file analog to running a ZPAQL configuration with zpaqd r [cfg] p|h          |       no
 
-*** Exposed API ***
+**Exposed API**
 
 The 32- or 8-bit memory areas H and M are available as arrays hH, pH, hM, pM
 depending on being a hcomp or pcomp section with size 2**hh , 2**hm , 2**ph ,
@@ -186,26 +179,15 @@ There is support for len(hH), len(pH), len(hM), len(pM) instead of calculating
 arrays. NONE is a shortcut for 0 - 1 = 4294967295.
 
       Other functions       |                   Description
-============================|==================================================
-c = read_b()                | Read one input byte, might leave VM execution and
-                            | return to get next
-____________________________|__________________________________________________
-push_b(c)                   | Put read byte c back, overwrites if already
-                            | present (no buffer)
-____________________________|__________________________________________________
-c = peek_b()                | Read but do not consume next byte, might leave VM
-                            | execution and return to get next
-____________________________|__________________________________________________
+----------------------------|--------------------------------------------------
+c = read_b()                | Read one input byte, might leave VM execution and return to get next
+push_b(c)                   | Put read byte c back, overwrites if already present (no buffer)
+c = peek_b()                | Read but do not consume next byte, might leave VM execution and return to get next
 out(c)                      | In pcomp: write c to output stream
-____________________________|__________________________________________________
 error()                     | Execution fails with ”Bad ZPAQL opcode”
-____________________________|__________________________________________________
 aref = alloc_pH(asize), …   | Allocate an array of size asize on pH/pM/hH/hM
-____________________________|__________________________________________________
 aref = array_pH(intaddr), … | Cast an integer address back to a reference
-____________________________|__________________________________________________
 len_pH(aref), …             | Get the length of an array in pH/pM/hH/hM
-____________________________|__________________________________________________
 free_pH(aref), …            | Free the memory in pH/pM/hH/hM again by
                             | destructing the array
 
@@ -231,21 +213,21 @@ A context mixing model with a preprocessor for run length encoding.
 Three components are used to form the network.
 
 Create a new template which will then be modified at the beginning and the pcomp/hcomp sections:
-  ./zpaqlpy --emit-template > rle_model.py
-  chmod +x rle_model.py
+    ./zpaqlpy --emit-template > rle_model.py
+    chmod +x rle_model.py
 
 First the size of the arrays H and M for each section, hcomp and pcomp needs to be specified:
-  hh = 2  # i.e. size is 2**2 = 4, because H[0], H[1], H[2] are the inputs for the components
+    hh = 2  # i.e. size is 2**2 = 4, because H[0], H[1], H[2] are the inputs for the components
 
 The first component should give predictions based on the byte value and the second component based on the run length,
 both give predictions for the next count and the next value.
 Then the context-mixing components are combined to a network:
 
-  n = len({
-    0: "cm 19 22",  # context table size 2*19 with partly decoded byte as 9 bit hash xored with the context, count limit 22
-    1: "cm 19 22",
-    2: "mix2 1 0 1 30 0",  # will mix 0 and 1 together, context table size 2**1 with and-0 masking of the partly decoded byte which is added to the context, learning rate 30
-  })
+    n = len({
+      0: "cm 19 22",  # context table size 2*19 with partly decoded byte as 9 bit hash xored with the context, count limit 22
+      1: "cm 19 22",
+      2: "mix2 1 0 1 30 0",  # will mix 0 and 1 together, context table size 2**1 with and-0 masking of the partly decoded byte which is added to the context, learning rate 30
+    })
 
 Each component i gets its context input from the entry in H[i] after each run of
 the hcomp function, which is called for each input byte of the preprocessed data,
@@ -254,7 +236,7 @@ or is retrieved through decoding in decompression phase with following
 postprocessing done by calls of the pcomp function.
 
 Then we specify a preprocessor:
-  pcomp_invocation = "./simple_rle"
+    pcomp_invocation = "./simple_rle"
 
 The context-mixing network is written to the archive in byte representation
 as well as the bytecode for hcomp and pcomp (if they are used).
@@ -265,85 +247,85 @@ compressing archiver and is of no use for decompression it is therefore not
 mentioned in the archive anymore.
 
 Create the preprocessor file and fill it:
-$ chmod +x simple_rle
-$ cat ./simple_rle
-#!/usr/bin/env python3
-import sys
-input = sys.argv[1]
-output = sys.argv[2]
-with open(input, mode='rb') as fi:
-  with open(output, mode='wb') as fo:
-      last = None
-      count = 0
-      data = []
-      for a in fi.read():
-        if a != last or count == 255:  # count only up to 255 to use one byte
-          if last != None:  # write out the pair
+    $ chmod +x simple_rle
+    $ cat ./simple_rle
+    #!/usr/bin/env python3
+    import sys
+    input = sys.argv[1]
+    output = sys.argv[2]
+    with open(input, mode='rb') as fi:
+      with open(output, mode='wb') as fo:
+          last = None
+          count = 0
+          data = []
+          for a in fi.read():
+            if a != last or count == 255:  # count only up to 255 to use one byte
+              if last != None:  # write out the pair
+                data.append(last)
+                data.append(count)
+              last = a  # start counting
+              count = 1
+            else:
+              count += 1  # continue counting
+          if last != None:
             data.append(last)
             data.append(count)
-          last = a  # start counting
-          count = 1
-        else:
-          count += 1  # continue counting
-      if last != None:
-        data.append(last)
-        data.append(count)
-      fo.write(bytes(data))
+          fo.write(bytes(data))
 
 Then we need code in the pcomp section to undo this transform:
 
-case_loading = False
-last = NONE
-
-def pcomp(c):
-  global case_loading, last
-  if c == NONE:  # start of new segment, so restart our code
     case_loading = False
     last = NONE
-    return
-  if not case_loading:  # c is byte to load
-    case_loading = True
-    last = c
-  else:  # write out content of last c times
-    case_loading = False
-    while c > 0:
-      c-= 1
-      out(last)
+    
+    def pcomp(c):
+      global case_loading, last
+      if c == NONE:  # start of new segment, so restart our code
+        case_loading = False
+        last = NONE
+        return
+      if not case_loading:  # c is byte to load
+        case_loading = True
+        last = c
+      else:  # write out content of last c times
+        case_loading = False
+        while c > 0:
+          c-= 1
+          out(last)
 
 So now it should produce the same file as the input file:
-  ./simple_rle INPUTFILE input.rle
-  ./rle_model.py pcomp input.rle input.norle
-  cmp INPUTFILE input.norle
+    ./simple_rle INPUTFILE input.rle
+    ./rle_model.py pcomp input.rle input.norle
+    cmp INPUTFILE input.norle
 
 And we can already try it, even if hcomp does not compute the context data yet (so compression is not really good):
-  ./zpaqlpy rle_model.py
-  ./zpaqd c rle_model.cfg archive.zpaq FILE FILE FILE
+    ./zpaqlpy rle_model.py
+    ./zpaqd c rle_model.cfg archive.zpaq FILE FILE FILE
 
 Now we can add hcomp code to improve compression by adaptive prediction:
 
-at_counter = False  # if false, then c is byte, otherwise c is a counter
-last_value = 0
-last_counter = 0
-
-def hcomp(c):  # pcomp bytecode is passed first (or 0 if there is none)
-  global at_counter, last_value, last_counter
-  if at_counter:
-    last_counter = c
-  else:
-    last_value = c
-  # first part of the context for the first CM is the byte replicated and
-  # the second part is whether we are at a counter (then we predict for a byte) or vice versa
-  hH[0] = (last_value << 1) + at_counter  # at_counter will occupy one bit, therefore shift
-  hH[0] <<= 9  # again shift to the side because of the xor with the partially decoded byte
-  # second CM same but uses the counter for prediction
-  hH[1] = (last_counter << 1) + at_counter
-  hH[1] <<= 9
-  hH[2] = at_counter + 0  # context for mixer: is at counter (1) or not (0)
-  at_counter = not at_counter
+    at_counter = False  # if false, then c is byte, otherwise c is a counter
+    last_value = 0
+    last_counter = 0
+    
+    def hcomp(c):  # pcomp bytecode is passed first (or 0 if there is none)
+      global at_counter, last_value, last_counter
+      if at_counter:
+        last_counter = c
+      else:
+        last_value = c
+      # first part of the context for the first CM is the byte replicated and
+      # the second part is whether we are at a counter (then we predict for a byte) or vice versa
+      hH[0] = (last_value << 1) + at_counter  # at_counter will occupy one bit, therefore shift
+      hH[0] <<= 9  # again shift to the side because of the xor with the partially decoded byte
+      # second CM same but uses the counter for prediction
+      hH[1] = (last_counter << 1) + at_counter
+      hH[1] <<= 9
+      hH[2] = at_counter + 0  # context for mixer: is at counter (1) or not (0)
+      at_counter = not at_counter
 
 We need to compile again before we run the final ZPAQ configuration file:
-  ./zpaqlpy rle_model.py
-  ./zpaqd c rle_model.cfg archive.zpaq FILE FILE FILE
+    ./zpaqlpy rle_model.py
+    ./zpaqd c rle_model.cfg archive.zpaq FILE FILE FILE
 
-zpaqd needs to have simple_rle in the same folder because we specified pcomp_invocation = "./simple_rle"
+zpaqd needs to have simple_rle in the same folder because we specified `pcomp_invocation = "./simple_rle"`
 
