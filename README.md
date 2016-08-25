@@ -213,10 +213,12 @@ A context mixing model with a preprocessor for run length encoding.
 Three components are used to form the network.
 
 Create a new template which will then be modified at the beginning and the pcomp/hcomp sections:
+
     ./zpaqlpy --emit-template > rle_model.py
     chmod +x rle_model.py
 
 First the size of the arrays H and M for each section, hcomp and pcomp needs to be specified:
+
     hh = 2  # i.e. size is 2**2 = 4, because H[0], H[1], H[2] are the inputs for the components
 
 The first component should give predictions based on the byte value and the second component based on the run length,
@@ -236,6 +238,7 @@ or is retrieved through decoding in decompression phase with following
 postprocessing done by calls of the pcomp function.
 
 Then we specify a preprocessor:
+
     pcomp_invocation = "./simple_rle"
 
 The context-mixing network is written to the archive in byte representation
@@ -247,6 +250,7 @@ compressing archiver and is of no use for decompression it is therefore not
 mentioned in the archive anymore.
 
 Create the preprocessor file and fill it:
+
     $ chmod +x simple_rle
     $ cat ./simple_rle
     #!/usr/bin/env python3
@@ -293,11 +297,13 @@ Then we need code in the pcomp section to undo this transform:
           out(last)
 
 So now it should produce the same file as the input file:
+
     ./simple_rle INPUTFILE input.rle
     ./rle_model.py pcomp input.rle input.norle
     cmp INPUTFILE input.norle
 
 And we can already try it, even if hcomp does not compute the context data yet (so compression is not really good):
+
     ./zpaqlpy rle_model.py
     ./zpaqd c rle_model.cfg archive.zpaq FILE FILE FILE
 
@@ -324,6 +330,7 @@ Now we can add hcomp code to improve compression by adaptive prediction:
       at_counter = not at_counter
 
 We need to compile again before we run the final ZPAQ configuration file:
+
     ./zpaqlpy rle_model.py
     ./zpaqd c rle_model.cfg archive.zpaq FILE FILE FILE
 
