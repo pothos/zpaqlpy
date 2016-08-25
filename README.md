@@ -6,7 +6,7 @@ That way it is easy to develop new compression algorithms with ZPAQ.
 Or to bring a decompression algorithm to the ZPAQ format so that the compressed data can be stored in a ZPAQ archive without breaking compatibility.
 The Python source files are standalone executable with Python 3 (tested: 3.4, 3.5).
 
-Jump to the end for a tutorial or look into src/test/lz1.py, src/test/pnm.py or src/test/brotli.py for an example.
+Jump to the end for a tutorial or look into test/lz1.py, test/pnm.py or test/brotli.py for an example.
 
 Build with: make zpaqlpy
 To build again: make clean
