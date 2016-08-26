@@ -17,7 +17,7 @@ To build again: `make clean`
 
 [B.Sc. Thesis](https://github.com/pothos/papers/raw/master/BSc_thesis_ZPAQL_compiler.pdf)
 
-Copyright (C) 2016 Kai Lüke kailueke@riseup.net
+Copyright (C) 2016 Kai Lüke kailueke at@ riseup.net
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
