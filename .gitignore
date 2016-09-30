@@ -3,6 +3,8 @@ zpaq
 zpaqd
 zpaqlpy
 zpaqlpydebug
+zpaqlpy-i686.exe
+zpaqlpy.exe
 src/grammar.rs
 *.py~
 *.py.swp

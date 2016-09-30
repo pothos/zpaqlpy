@@ -5,7 +5,7 @@ zpaqlpy: target/release/zpaqlpy
 	cp target/release/zpaqlpy zpaqlpy
 
 target/debug/zpaqlpy:
-	cargo build #  RUSTFLAGS="-Zincremental=target/INCREMENTAL -Zorbit"
+	cargo build #  RUSTFLAGS="-Zincremental=target/INCREMENTAL -Zorbit"  # or: cargo incremental build
 
 target/release/zpaqlpy:
 	cargo build --release
