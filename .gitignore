@@ -5,6 +5,7 @@ zpaqlpy
 zpaqlpydebug
 zpaqlpy-i686.exe
 zpaqlpy.exe
+zpaqlpy-cross.exe
 src/grammar.rs
 *.py~
 *.py.swp
