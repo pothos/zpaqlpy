@@ -54,7 +54,7 @@ under certain conditions, see https://www.gnu.org/licenses/gpl-3.0.en.html")
                               --fixed-global-access              'Calculate full address for globals on each access'
                               --ignore-errors                    'Continues for some errors which lead to an invalid ZPAQ config file'
                               --emit-template                    'Print an empty template (supports -o)'
-                              --no-post-zpaql                    'Disable ZPAQL optmisation pass for successive byte assignments on an array in M'
+                              --no-post-zpaql                    'Disable ZPAQL optimisation pass for successive byte assignments on an array in M'
                               --no-comments                      'Do not write original code lines as comments beside output'
                               --no-pc-comments                   'Do not annotate programme counter for opcodes'
                               --stacksize=[NUMBER]            'Set size of stack to NUMBER (default: 1048576 = 1MiB, <= 2^32 - 2^?h)'
