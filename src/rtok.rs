@@ -304,7 +304,7 @@ pub fn tokenize(input: &str) -> Vec<tok::Tok> {
                  r"//=?", r"->",
                  r"[-+*/%&@|^=<>]=?",  // don't escape -
                  r"~");
-    let Bracket = "[][(){}]";  // strange?
+    let Bracket = "[]\\[(){}]";  // strange?
     let Special = group3(r"\r?\n", r"\.\.\.", r"[:;.,@]");
     let Funny = group3(&Operator, &Bracket, &Special);
     // let PlainToken = group4(&Number, &Funny, &xString, &Name);
@@ -316,7 +316,7 @@ pub fn tokenize(input: &str) -> Vec<tok::Tok> {
     let PseudoToken = format!("^{}{}", Whitespace, group5(&PseudoExtras, &Number, &Funny, &ContStr, &Name) );
     let PseudoTokenRE = Regex::new(PseudoToken.as_str()).unwrap();  // matches only at the beginning
 
-    let isidentifier = Regex::new(r"^[:alpha:][:word:]*").unwrap();
+    let isidentifier = Regex::new(r"^[[:alpha:]][[:word:]]*").unwrap();
 
 
     let mut tokens = Vec::new();
@@ -355,7 +355,7 @@ pub fn tokenize(input: &str) -> Vec<tok::Tok> {
             }
             let endmatch = endprog.captures(line.as_str());
             if endmatch.is_some() {
-                pos = endmatch.unwrap().at(0).unwrap().chars().count();
+                pos = endmatch.unwrap().get(0).unwrap().as_str().chars().count();
                 let end = pos;
                 tokens.push(token_info(STRING, &{ let mut s = String::from(contstr); s.push_str( &charstring(& (line.chars().collect::<Vec<char>>()[..end])) ); s }, strstart, (lnum, end)));
                 contstr = "".to_string();
@@ -452,7 +452,7 @@ pub fn tokenize(input: &str) -> Vec<tok::Tok> {
                     println!("{}", tm);
                     println!("{:?}", pv);
                 }*/
-                let first = pv.at(1).unwrap();
+                let first = pv.get(1).unwrap().as_str();
                 let matchstart = if tm.starts_with(first) {0} else { tm.split(first).next().unwrap().chars().count() };
                 let matchlen = first.chars().count();
                 let (start, end) = (pos+matchstart, pos+matchstart+matchlen);
@@ -502,7 +502,7 @@ pub fn tokenize(input: &str) -> Vec<tok::Tok> {
                         let ev = endmatch.unwrap();
                         // println!("{:?},{:?}", endprog, ev);
                         // @TODO: original group was 1 for: ^[^"\\]*(?:(?:\\.|"(?:[^"][^"]))[^"\\]*)*""", here set to 0 because grouping seems to be different in Rust to Python
-                        pos = pos + ev.at(0).unwrap().chars().count(); // unwrap_or_else: || panic!("{},{},{}", line, pos, tx)
+                        pos = pos + ev.get(0).unwrap().as_str().chars().count(); // unwrap_or_else: || panic!("{},{},{}", line, pos, tx)
                         token = charstring(&(line.chars().collect::<Vec<char>>()[start..pos]));
                         tokens.push(token_info(STRING, &token, spos, (lnum, pos)));
                     } else {

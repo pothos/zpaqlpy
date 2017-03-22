@@ -5,10 +5,16 @@ zpaqlpy: target/release/zpaqlpy
 	cp target/release/zpaqlpy zpaqlpy
 
 target/debug/zpaqlpy:
-	cargo build #  RUSTFLAGS="-Zincremental=target/INCREMENTAL -Zorbit"  # or: cargo incremental build
+	cargo build  # or: cargo incremental build # new: CARGO_INCREMENTAL=1 cargo build
 
 target/release/zpaqlpy:
 	cargo build --release
+
+cargotest:
+	cargo check
+
+cargolint:
+	cargo +nightly clippy
 
 clean:
 	rm target/debug/zpaqlpy target/release/zpaqlpy
