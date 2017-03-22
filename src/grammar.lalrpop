@@ -4,7 +4,7 @@ use ast::{Stmt, Expr, ExprContext, Slice, BoolOp, Operator, CmpOp, UnaryOp}; // 
 // https://docs.python.org/3/reference/grammar.html
 
 #[LALR]
-#[recursive_ascent] grammar;
+grammar;
 
 use tok::Tok;
 

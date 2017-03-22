@@ -17,4 +17,3 @@ lalrpop-util = { git = "https://github.com/nikomatsakis/lalrpop.git" }
 
 [build-dependencies.lalrpop]
 git = "https://github.com/nikomatsakis/lalrpop.git"
-#version = "0.12.5"
