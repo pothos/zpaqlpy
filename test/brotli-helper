@@ -1,12 +1,13 @@
 #!/bin/sh
-# dict_is_present.tmp has to be removed before the a block is appended
-./bro --quality 9 --input "$1" --output tmp.br
+# dict_is_present.tmp has to be removed before a block is appended, will be created after first segment is added and remain while other segments are appended to block (so they don't need the dict prepended to them again)
+TMPBR=`tempfile`.br
+./bro --quality 9 --input "$1" --output "$TMPBR"
 if [ -e dict_is_present.tmp ]
 then
   printf "x" > "$2"  # no dict
-  cat tmp.br >> "$2"
+  cat "$TMPBR" >> "$2"
 else
-  cat ./brotli-dict tmp.br > "$2"
+  cat ./brotli-dict "$TMPBR" > "$2"
   touch dict_is_present.tmp
 fi
-rm tmp.br
+rm "$TMPBR"

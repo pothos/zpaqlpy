@@ -62,9 +62,7 @@ benchmark:
 
 brotlitest:
 	RUST_BACKTRACE=1 ./zpaqlpydebug test/brotli.py
-	touch test/dict_is_present.tmp
-	rm test/dict_is_present.tmp
-	cd test && ../zpaqd c brotli.cfg testar.zpaq testcase rafale.pnm peppers.pnm monarch.pnm kodim23.pnm && cd .. && ls -l test/testar.zpaq
+	./brotlizpaq c test/testar.zpaq test/testcase test/rafale.pnm test/peppers.pnm test/monarch.pnm test/kodim23.pnm && ls -l test/testar.zpaq
 	# run on input: ../zpaqd r brotli.cfg p pre.dict.br pre.out
 	# debug: ../zpaqd t brotli.cfg p `od -A none -t x1 -v pre.dict.br | tr -d '\n'`
 	# use: ./zpaq x test/testar.zpaq -to various

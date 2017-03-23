@@ -1,0 +1,39 @@
+#!/bin/bash
+# usage: brotlizpaq a|c archive.zpaq INPUTFILES…
+# a: append to existing archive, c: create (invokation of zpaqd)
+# creates a valid zpaq archive and stores the files compressed with brotli
+# needs path to brotli.cfg, brotli-dict, zpaqd
+# and bro (https://github.com/google/brotli with usage as bro --quality 9 --input IN --output OUT.br)
+
+# needs pcomp line as "pcomp ./brotli-helper ;" (copied from git or compiled from zpaqlpy test/brotli.py)
+BROTLICFG="test/brotli.cfg"
+ZPAQD="./zpaqd"
+BRO="test/bro"
+BROTLIDICT="test/brotli-dict"
+
+if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]
+  then
+  echo "usage: $0 a|c archive.zpaq INPUTFILES…"
+  exit
+fi
+
+# temp files must not contain a . (so invoke tmpfile instead of mktemp)
+TMPCFG=`tempfile`.cfg
+TMPHELPER=`tempfile`
+TMPLOCK=`tempfile`
+cat "$BROTLICFG" |  sed "s#pcomp ./brotli-helper ;#pcomp $TMPHELPER ;#g" > "$TMPCFG"
+printf '#!/bin/sh\nTMPBR=`tempfile`.br\n' > "$TMPHELPER"
+printf "\"$BRO\"" >> "$TMPHELPER"
+echo ' --quality 9 --input "$1" --output "$TMPBR"' >> "$TMPHELPER"
+printf "if [ -e \"$TMPLOCK\" ]\n" >> "$TMPHELPER"
+printf 'then\n  printf "x" > "$2"  # no dict\n  cat "$TMPBR" >> "$2"\nelse\n' >> "$TMPHELPER"
+printf "  cat \"$BROTLIDICT\" " >> "$TMPHELPER"
+printf '"$TMPBR" > "$2"\n  touch ' >> "$TMPHELPER"
+echo "\"$TMPLOCK\"" >> "$TMPHELPER"
+printf 'fi\nrm "$TMPBR"' >> "$TMPHELPER"
+
+chmod +x "$TMPHELPER"
+
+rm "$TMPLOCK"
+"$ZPAQD" "$1" "$TMPCFG" "$2" "${@:3}"
+rm "$TMPHELPER" "$TMPCFG" "$TMPLOCK"

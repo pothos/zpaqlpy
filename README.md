@@ -7,11 +7,20 @@ That way it is easy to develop new compression algorithms with ZPAQ.
 
 Or to bring a decompression algorithm to the ZPAQ format so that the compressed data can be stored in a ZPAQ archive without breaking compatibility.
 
+Example is the `brotlizpaq` wrapper around `zpaqd` which can compresses the input files with brotli and stores them in a valid ZPAQ archive (which will decompress slower than native brotli decompression).
+
 The Python source files are standalone executable with Python 3 (tested: 3.4, 3.5).
 
 Jump to the end for a tutorial or look into test/lz1.py, test/pnm.py or test/brotli.py for an example.
 
-Build with: `make zpaqlpy`
+Download from [releases](https://github.com/pothos/zpaqlpy/releases)
+or install with
+
+    git clone https://github.com/pothos/zpaqlpy.git
+    cd zpaqlpy
+    cargo install  # will build and copy the binary to ~/.cargo/bin/
+
+Build in place with: `make zpaqlpy`
 
 To build again: `make clean`
 
