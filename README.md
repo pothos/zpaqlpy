@@ -7,7 +7,7 @@ That way it is easy to develop new compression algorithms with ZPAQ.
 
 Or to bring a decompression algorithm to the ZPAQ format so that the compressed data can be stored in a ZPAQ archive without breaking compatibility.
 
-Example is the `brotlizpaq` wrapper around `zpaqd` which can compresses the input files with brotli and stores them in a valid ZPAQ archive (which will decompress slower than native brotli decompression).
+Example is the `brotlizpaq` wrapper around `zpaqd` which can compresses the input files with brotli and stores them as valid blocks in a ZPAQ archive (which will decompress slower than native brotli decompression).
 
 The Python source files are standalone executable with Python 3 (tested: 3.4, 3.5).
 
