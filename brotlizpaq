@@ -11,6 +11,9 @@ ZPAQD="./zpaqd"
 BRO="test/bro"
 BROTLIDICT="test/brotli-dict"
 
+set -euo pipefail
+# -euxo pipefail to debug
+
 if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]
   then
   echo "usage: $0 a|c archive.zpaq INPUTFILES…"
