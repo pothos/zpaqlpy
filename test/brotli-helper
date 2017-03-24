@@ -1,5 +1,6 @@
 #!/bin/sh
 # dict_is_present.tmp has to be removed before a block is appended, will be created after first segment is added and remain while other segments are appended to block (so they don't need the dict prepended to them again)
+set -eu
 TMPBR=`tempfile`.br
 ./bro --quality 9 --input "$1" --output "$TMPBR"
 if [ -e dict_is_present.tmp ]
