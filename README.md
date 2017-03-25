@@ -11,7 +11,7 @@ An example is the `brotlizpaq` wrapper around `zpaqd` which compresses the input
 
 The Python source files are standalone executable with Python 3 (tested: 3.4, 3.5).
 
-Jump to the end for a tutorial or look into [https://github.com/pothos/zpaqlpy/tree/master/test/lz1.py](test/lz1.py), [https://github.com/pothos/zpaqlpy/tree/master/test/test/pnm.py](test/pnm.py) or [https://github.com/pothos/zpaqlpy/tree/master/test/brotli.py](test/brotli.py) for an example.
+Jump to the end for a tutorial or look into [test/lz1.py](https://github.com/pothos/zpaqlpy/tree/master/test/lz1.py), [test/pnm.py](https://github.com/pothos/zpaqlpy/tree/master/test/test/pnm.py) or [test/brotli.py](https://github.com/pothos/zpaqlpy/tree/master/test/brotli.py) for an example.
 
 Download from [releases](https://github.com/pothos/zpaqlpy/releases)
 or install with
