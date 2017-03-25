@@ -11,7 +11,7 @@ An example is the `brotlizpaq` wrapper around `zpaqd` which compresses the input
 
 The Python source files are standalone executable with Python 3 (tested: 3.4, 3.5).
 
-Jump to the end for a tutorial or look into test/lz1.py, test/pnm.py or test/brotli.py for an example.
+Jump to the end for a tutorial or look into [https://github.com/pothos/zpaqlpy/tree/master/test/lz1.py](test/lz1.py), [https://github.com/pothos/zpaqlpy/tree/master/test/test/pnm.py](test/pnm.py) or [https://github.com/pothos/zpaqlpy/tree/master/test/brotli.py](test/brotli.py) for an example.
 
 Download from [releases](https://github.com/pothos/zpaqlpy/releases)
 or install with
@@ -182,13 +182,13 @@ without a BOM (Byte-Order-Mark). The definitions at the beginning should be
 altered and own code inserted only behind. The other two editable sections can
 refer to definitions in the first section.
 
-        Template Sections (--emit-template > source.py)         |   Editable?
-----------------------------------------------------------------|--------------
-  Definition of the ZPAQ configuration header data (memory size, context mixing components) and optionally functions and variables used by both hcomp and pcomp                        |      yes
-  API functions for input and output, initialization of memory  |       no
-  function hcomp and associated global variables and functions  |      yes
-  function pcomp and associated global variables and functions  |      yes
-  code for standalone execution of the Python file analog to running a ZPAQL configuration with zpaqd `r [cfg] p|h`          |       no
+            Template Sections (--emit-template > source.py)         |   Editable?
+    ----------------------------------------------------------------|--------------
+      Definition of the ZPAQ configuration header data (memory size, context mixing components) and optionally functions and variables used by both hcomp and pcomp                        |      yes
+      API functions for input and output, initialization of memory  |       no
+      function hcomp and associated global variables and functions  |      yes
+      function pcomp and associated global variables and functions  |      yes
+      code for standalone execution of the Python file analog to running a ZPAQL configuration with zpaqd `r [cfg] p|h`          |       no
 
 **Exposed API**
 
@@ -199,18 +199,18 @@ There is support for `len(hH)`, `len(pH)`, `len(hM)`, `len(pM)` instead of calcu
 `2**hh`. But in general len() is not supported, see `len_hH()` below for dynamic
 arrays. `NONE` is a shortcut for 0 - 1 = 4294967295.
 
-      Other functions       |                   Description
-----------------------------|--------------------------------------------------
-c = read_b()                | Read one input byte, might leave VM execution and return to get next
-push_b(c)                   | Put read byte c back, overwrites if already present (no buffer)
-c = peek_b()                | Read but do not consume next byte, might leave VM execution and return to get next
-out(c)                      | In pcomp: write c to output stream
-error()                     | Execution fails with ”Bad ZPAQL opcode”
-aref = alloc_pH(asize), …   | Allocate an array of size asize on pH/pM/hH/hM
-aref = array_pH(intaddr), … | Cast an integer address back to a reference
-len_pH(aref), …             | Get the length of an array in pH/pM/hH/hM
-free_pH(aref), …            | Free the memory in pH/pM/hH/hM again by
-                            | destructing the array
+          Other functions       |                   Description
+    ----------------------------|--------------------------------------------------
+    c = read_b()                | Read one input byte, might leave VM execution and return to get next
+    push_b(c)                   | Put read byte c back, overwrites if already present (no buffer)
+    c = peek_b()                | Read but do not consume next byte, might leave VM execution and return to get next
+    out(c)                      | In pcomp: write c to output stream
+    error()                     | Execution fails with ”Bad ZPAQL opcode”
+    aref = alloc_pH(asize), …   | Allocate an array of size asize on pH/pM/hH/hM
+    aref = array_pH(intaddr), … | Cast an integer address back to a reference
+    len_pH(aref), …             | Get the length of an array in pH/pM/hH/hM
+    free_pH(aref), …            | Free the memory in pH/pM/hH/hM again by
+                                | destructing the array
 
 If backend implementations `addr_alloc_pH(size)`, `addr_free_pH(addr)`, … are
 defined then dynamic memory management is available though the API functions
