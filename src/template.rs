@@ -426,10 +426,7 @@ class WouldNotBeReached(Exception):
 
 def finish_output():
   global output
-  try:
-    args.output[0].write(bytes(output))
-  except:  # stdout
-    args.output[0].buffer.write(bytes(output))
+  args.output[0].write(bytes(output))
   output = deque([])
   if len(args.output) > 1:
     args.output.pop(0)
@@ -437,10 +434,10 @@ def finish_output():
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('method', help='run either hcomp or pcomp on each byte of the input\nfor hcomp output will be pairs of input and contexts', choices=['hcomp', 'pcomp'])
-parser.add_argument('input', nargs='?', type=argparse.FileType('rb'), default=sys.stdin, help='input file')
+parser.add_argument('input', nargs='?', type=argparse.FileType('rb'), default=sys.stdin.buffer, help='input file')
 parser.add_argument('--append', type=argparse.FileType('rb'), dest='addseg', default=[], metavar='FILE', action='append', help='additional input files')
 parser.add_argument('--compare', type=argparse.FileType('rb'), dest='compare', default=None, metavar='EXPECTEDFILE', help='compare pcomp output and run ipdb for mismatch')
-parser.add_argument('output', nargs='*', type=argparse.FileType('wb'), default=[sys.stdout], help='output file')
+parser.add_argument('output', nargs='*', type=argparse.FileType('wb'), default=[sys.stdout.buffer], help='output file')
 args = parser.parse_args()
 cmpbuf = None
 if args.compare:

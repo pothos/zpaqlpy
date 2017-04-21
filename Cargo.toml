@@ -13,7 +13,7 @@ flexi_logger = "0.5.2"
 log = "*"
 regex = "0.2.1"
 
-lalrpop-util = { git = "https://github.com/nikomatsakis/lalrpop.git" }
+lalrpop-util = "0.13.0"
 
 [build-dependencies.lalrpop]
-git = "https://github.com/nikomatsakis/lalrpop.git"
+version = "0.13.0"

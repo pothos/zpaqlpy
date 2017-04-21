@@ -5,15 +5,15 @@ zpaqlpy: target/release/zpaqlpy
 	cp target/release/zpaqlpy zpaqlpy
 
 target/debug/zpaqlpy:
-	# warning: if lalrpop binary is in $PATH, it will be used instead of the library call
-	cargo build  # or: cargo incremental build # new: CARGO_INCREMENTAL=1 cargo build
+	# warning: if lalrpop binary is in PATH, it will be used instead of the library call
+	LALRPOP_LANE_TABLE=enabled cargo +stable build  # or: cargo incremental build # new: CARGO_INCREMENTAL=1 cargo build
 
 target/release/zpaqlpy:
-	# warning: if lalrpop binary is in $PATH, it will be used instead of the library call
-	cargo build --release
+	# warning: if lalrpop binary is in PATH, it will be used instead of the library call
+	LALRPOP_LANE_TABLE=enabled cargo +stable build --release
 
 cargotest:
-	cargo check
+	cargo +stable check
 
 cargolint:
 	cargo +nightly clippy
