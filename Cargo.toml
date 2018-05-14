@@ -13,7 +13,7 @@ flexi_logger = "0.5.2"
 log = "*"
 regex = "0.2.1"
 
-lalrpop-util = "0.13.0"
+lalrpop-util = "0.15.2"
 
 [build-dependencies.lalrpop]
-version = "0.13.0"
+version = "0.15.2"

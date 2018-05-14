@@ -207,10 +207,10 @@ fn parse(optioncfg: &options::Options, input: &String) -> (Vec<ast::Stmt>, Vec<a
         debug!("  {:?},", tokn);
     }
     info!("end of extracted sections");
-    let parsed_hcomp = grammar::parse_Prog(hcomp).unwrap_or_else(|e| panic!("parser error: {:?}", e) );
+    let parsed_hcomp = grammar::ProgParser::new().parse(hcomp).unwrap_or_else(|e| panic!("parser error: {:?}", e) );
     info!("parsed grammar hcomp");
     debug!("[\n  {}]", parsed_hcomp.iter().map(|st| format!("{}", st).replace("\n", "\n  ")).collect::<Vec<String>>()[..].join(",\n  "));
-    let parsed_pcomp = grammar::parse_Prog(pcomp).unwrap();
+    let parsed_pcomp = grammar::ProgParser::new().parse(pcomp).unwrap();
     info!("parsed grammar pcomp");
     debug!("[\n  {}]", parsed_pcomp.iter().map(|st| format!("{}", st).replace("\n", "\n  ")).collect::<Vec<String>>()[..].join(",\n  "));
     (parsed_hcomp, parsed_pcomp)
@@ -289,7 +289,7 @@ fn compile(optioncfg: &options::Options, input: String, mut output: File) -> Opt
 /*
 #[test]
 fn tokenizer() {
-    //assert!(grammar::parse_Prog(tok::tokenize("\n22\n")).is_ok());
+    //assert!(grammar::ProgParser::new().parse(tok::tokenize("\n22\n")).is_ok());
     assert_eq!(tok::tokenize("pass"), rtok::tokenize("pass"));  // relies on external programme call
 }
 */

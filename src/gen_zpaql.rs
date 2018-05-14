@@ -83,7 +83,7 @@ impl Cache {
 }
 
 /// compile IR code (which works on H, M and R) to ZPAQL code by using the registers A-D
-pub fn emit_zpaql(irc: &[IR], mut ch: &mut Cache, optioncfg: &options::Options) -> Vec<ZPAQLOp> {
+pub fn emit_zpaql(irc: &[IR], ch: &mut Cache, optioncfg: &options::Options) -> Vec<ZPAQLOp> {
     let mut code = vec![];
     for op in irc {
         match op.convert() {  // write original IR statement as comment
@@ -351,7 +351,7 @@ pub fn emit_zpaql(irc: &[IR], mut ch: &mut Cache, optioncfg: &options::Options) 
 
 
 /// assign value to location, keeps track in the cache and overwrites A if value>255
-fn calc_number(value: u32, loc: &Loc, mut ch: &mut Cache) -> Vec<ZPAQLOp> {
+fn calc_number(value: u32, loc: &Loc, ch: &mut Cache) -> Vec<ZPAQLOp> {
     match ch.last_hold.get(&loc) {
         Some(&IRVar::Number{value: v}) if v == value => {
             return vec![];
@@ -425,7 +425,7 @@ fn calc_number(value: u32, loc: &Loc, mut ch: &mut Cache) -> Vec<ZPAQLOp> {
 
 
 /// returns the location of a variable and needed calculations, can overwrite A, C and D, keeps track in the cache
-fn gen_loc_for_var(var: &IRVar, mut ch: &mut Cache) -> (Vec<ZPAQLOp>, Loc) {
+fn gen_loc_for_var(var: &IRVar, ch: &mut Cache) -> (Vec<ZPAQLOp>, Loc) {
     match &(var.tovar()) {
         &IRVar::H{index_varid, orig_name: _} => {
             if ch.is_loc(&Loc::HD, &(var.tovar())) || ch.is_loc(&Loc::Reg(Reg::OtherReg(OtherReg::D)), &IRVar::Var{varid: index_varid}) {
@@ -508,7 +508,7 @@ fn gen_loc_for_var(var: &IRVar, mut ch: &mut Cache) -> (Vec<ZPAQLOp>, Loc) {
 
 /// copy value of variable to the location, keeps track in the cache and
 /// can overwrite D, B and A on the way, so if variable is on H, loc can't be HD and if variable is on M, loc can't be MB
-fn assign_var_to_loc(var: &IRVar, loc: &Loc, mut ch: &mut Cache) -> Vec<ZPAQLOp> {
+fn assign_var_to_loc(var: &IRVar, loc: &Loc, ch: &mut Cache) -> Vec<ZPAQLOp> {
     if ch.is_loc(loc, &(var.tovar())) { vec![] } else if ch.is_loc(&Loc::Reg(Reg::A), &(var.tovar())) {
         ch.remove_reg(loc);
         ch.last_hold.insert(loc.clone(), var.tovar());
@@ -648,7 +648,7 @@ fn assign_var_to_loc(var: &IRVar, loc: &Loc, mut ch: &mut Cache) -> Vec<ZPAQLOp>
 
 /// copy value of location into the location of the variable, keeps track in the cache
 /// and can overwrite D, C and A, so if variable is on H, loc can't be HD or D and if variable is on M, loc can't be C or MC
-fn assign_loc_to_var(var: &IRVar, loc: &Loc, mut ch: &mut Cache) -> Vec<ZPAQLOp> {
+fn assign_loc_to_var(var: &IRVar, loc: &Loc, ch: &mut Cache) -> Vec<ZPAQLOp> {
     if ch.last_hold.get(loc).is_some() && ch.last_hold.get(loc).unwrap() == var {
         return vec![];  // if optimisations are to be turned off, also this case would have to be skipped
     }
