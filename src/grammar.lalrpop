@@ -3,7 +3,6 @@ use ast::{Stmt, Expr, ExprContext, Slice, BoolOp, Operator, CmpOp, UnaryOp}; // 
 // https://docs.python.org/3/reference/index.html
 // https://docs.python.org/3/reference/grammar.html
 
-#[LALR]
 grammar;
 
 use tok::Tok;
