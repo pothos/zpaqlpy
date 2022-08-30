@@ -24,7 +24,7 @@ Build in place with: `make zpaqlpy`
 
 To build again: `make clean`
 
-[B.Sc. Thesis](http://pothos.blogsport.eu/files/2016/10/bsc_thesis_zpaql_compiler.pdf)
+[B.Sc. Thesis](https://pothos.github.io/papers/BSc_thesis_ZPAQL_compiler.pdf)
 
 Copyright (C) 2016 Kai Lüke kailueke at@ riseup.net
 
